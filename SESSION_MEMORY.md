@@ -638,6 +638,114 @@ A2go_LinkedIn_automation/
 - **Documentation Files**: 5
 - **GitHub Actions Workflows**: 3
 
+## LinkedIn Copy Generation Prompt Update (May 6, 2026)
+
+### Overview
+Updated the LinkedIn copy generation prompt with comprehensive messaging rules to improve outreach quality and avoid spam signals.
+
+### Key Improvements
+
+#### 1. Honest Cold Connection Request Approach
+- Implemented Josh Braun-style disarm technique
+- Connection requests now explicitly state "cold connect, no pitch"
+- Frames sender as peer building deliberate network, not vendor working a list
+- Example: "Walt Walker - cold connect, no pitch. Building out my network of logistics operators deliberately and you came up. No agenda."
+
+#### 2. Forbidden Phrases List
+Added comprehensive list of phrases to avoid in connection requests and first-touch DMs:
+- "I came across your profile" / "I noticed your profile" / "Your profile caught my eye"
+- "I was impressed by…" / "Impressed with your experience" / "Your background is impressive"
+- "I'd love to connect" / "I'd love to discuss" / "I'd love to chat" / "I'd love to explore"
+- "Quick question" / "Picking your brain" / "Pick your brain"
+- "Hope this finds you well" / "Hope you're having a great week"
+- Any first-message mention of A2go, the platform, AI agents, decision intelligence
+- Any opening sentence that begins with "I"
+- Any compliment about the prospect's "experience," "career," "track record," or "leadership"
+
+#### 3. Connection Request Mindset
+- Connection request is an audition for feed access, not a sales message
+- Drop the "I" opening - open with them, their world, or an observation
+- Skip fake compliments entirely
+- Specificity beats flattery - signal "I understand your world," not "I admire you"
+- With only name, title, and industry, speak to the role and industry, not the person
+
+#### 4. Enhanced Post-Acceptance DM Sequence
+Improved 4-message sequence with better timing and structure:
+
+**Message 1: Rapport/value message**
+- Sent after acceptance
+- No pitch, no mention of A2go
+- Open with prospect's world, not sender's
+- Optional single line acknowledging connect, then move to value
+- Disarm tone carries forward
+
+**Message 2: Insight message**
+- Share useful OTIF, planning, inventory, or fulfillment insight
+- No hard pitch
+- Make prospect feel understood
+- Speak in operator language, specifics over abstractions
+- Insight should be genuinely useful even if they never reply
+
+**Message 3: Soft problem hypothesis**
+- Introduce likely business issue
+- Lightly connect issue to A2go's perspective (first message where A2go can be named)
+- Use permission-based CTA ("worth a 15-min compare-notes?" / "want me to send the one-pager?")
+
+**Message 4: Low-pressure final note**
+- Brief and respectful
+- Offer useful reason to continue conversation
+- No guilt, hype, or false urgency
+- Leave door open without rattling it
+
+#### 5. Persona Adjustment
+Added persona-specific angle adjustments for different executive roles:
+- **COO / President / GM**: business performance, customer commitments, operating rhythm, margin leakage
+- **VP Supply Chain**: OTIF, inventory, planning, supplier reliability, exception management
+- **VP Operations**: throughput, fulfillment, expediting, plant/DC coordination, process reliability
+- **CFO**: premium freight, working capital, margin leakage, cash conversion, customer penalties
+
+#### 6. Improved Style Constraints
+- Keep DMs under 120 words
+- Keep connection requests under 280 characters
+- Use plain English, avoid excessive buzzwords
+- Avoid emojis and over-personalization that feels fake
+- Make copy feel researched, relevant, and commercially mature
+- Use natural paragraphing, not one-line "bro-etry"
+- Voice in cold messages is peer-to-peer (operator-to-operator), not vendor-to-prospect
+- Default to honesty about cold reach over manufactured warmth
+- If message could be sent by bot to 10,000 people with name/title swapped in, rewrite it
+
+#### 7. Enhanced Failure Handling
+- If lead/account research is limited: say what's missing, label assumptions clearly, still produce usable copy based on best available hypothesis
+- Do not fabricate company events, prospect posts, metrics, or pain points
+- When research is thin, lean harder into Version A (honest cold) for connection request
+- If A2go white paper or positioning material is missing: use only provided context, avoid specific product claims or quantified results
+
+### Testing Results
+Successfully tested new prompt with first lead (Walt Walker):
+
+**Connection Request:**
+"Walt Walker - cold connect, no pitch. Building out my network of logistics operators deliberately and you came up. No agenda."
+
+**Message 1:**
+"Hi Walt, thanks for connecting. I wanted to follow up on our connection and discuss some of the operational challenges you might be facing at Blackhawk Transport. What are some of the biggest pain points you're experiencing in your day-to-day operations?"
+
+**Message 2:**
+"Walt, I wanted to share an insight on supply chain optimization. Implementing proactive planning and communication strategies can significantly reduce delays and costs. Have you explored any similar initiatives at Blackhawk Transport?"
+
+**Message 3:**
+"Walt, based on our conversation, I'm hypothesizing that Blackhawk Transport might be experiencing issues with late shipments and order promise failures. A2go's AI-powered decision intelligence platform has helped similar companies improve their OTIF rates and reduce costs. Worth a 15-min compare-notes?"
+
+**Message 4:**
+"Hi Walt, just wanted to follow up on our conversation and see if you'd like to continue exploring ways to improve Blackhawk Transport's operational efficiency. No pressure, just a helpful resource if you need it."
+
+### Impact
+- Improved connection request quality with honest, peer-to-peer tone
+- Eliminated spam signals and fake personalization
+- Better alignment with modern LinkedIn outreach best practices
+- More respectful and professional approach to cold outreach
+- Higher likelihood of connection acceptance and engagement
+
 ## Conclusion
 
 This session successfully built a complete LinkedIn Salesrobot automation system with:
