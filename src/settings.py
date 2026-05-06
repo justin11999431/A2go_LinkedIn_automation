@@ -30,6 +30,21 @@ class Settings:
             'max_retries': 3,
             'retry_delay': 5,
         },
+        'limits': {
+            'max_leads_per_day': 100,
+            'max_messages_per_day': 200,
+            'max_connection_requests_per_day': 20,
+            'max_follow_up_messages_per_day': 20,
+            'max_voice_messages_per_day': 20,
+            'max_video_messages_per_day': 20,
+            'max_profile_views_per_day': 20,
+            'max_inmail_messages_per_day': 20,
+            'max_profile_follows_per_day': 20,
+            'max_post_likes_comments_per_day': 20,
+            'max_endorsements_per_day': 20,
+            'max_withdraw_connection_requests_per_day': 10,
+            'max_invite_to_event_per_day': 30,
+        },
         'scheduling': {
             'monday_start_time': '08:07',
             'daily_ping_time': '08:17',
@@ -305,3 +320,23 @@ class Settings:
             Timezone string
         """
         return self.get('automation.timezone', 'America/Los_Angeles')
+    
+    def get_limits(self) -> Dict[str, Any]:
+        """Get all limits.
+        
+        Returns:
+            Dictionary of all limits
+        """
+        return self.get('limits', {})
+    
+    def get_limit(self, limit_name: str, default: Any = None) -> Any:
+        """Get specific limit.
+        
+        Args:
+            limit_name: Name of the limit
+            default: Default value if limit not found
+            
+        Returns:
+            Limit value
+        """
+        return self.get(f'limits.{limit_name}', default)

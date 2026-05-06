@@ -198,9 +198,17 @@ schedules:
 ### API Rate Limits
 
 #### Salesrobot API
-- **Connection Requests**: 50 per day
-- **Messages**: 200 per day
-- **Profile Views**: 500 per day
+- **Connection Requests**: 20 per day
+- **Follow-Up Messages**: 20 per day
+- **Voice Messages**: 20 per day
+- **Video Messages**: 20 per day
+- **Profile Views**: 20 per day
+- **InMail Messages**: 20 per day
+- **Profile Follows**: 20 per day
+- **Post Likes & Comments**: 20 per day
+- **Endorsements**: 20 per day
+- **Withdraw Connection Requests**: 10 per day
+- **Invite to Event**: 30 per day
 
 #### Google Sheets API
 - **Read Operations**: 100 per minute

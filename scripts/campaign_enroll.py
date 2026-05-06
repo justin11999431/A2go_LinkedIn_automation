@@ -72,8 +72,10 @@ def enroll_leads_in_campaigns(settings: Settings, dry_run: bool = True) -> dict:
         
         workflow_sheet_id = settings.get_workflow_sheet_id()
         
-        # Initialize stop rules manager
+        # Initialize stop rules manager with limits
         stop_rules = StopRulesManager()
+        limits = settings.get_limits()
+        stop_rules.update_global_state(limits)
         
         # Fetch leads from workflow sheet
         logger.info(f"Fetching leads from workflow sheet: {workflow_sheet_id}")

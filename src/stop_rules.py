@@ -20,6 +20,19 @@ class StopRuleType(Enum):
     MAX_LEADS_PER_DAY_REACHED = "max_leads_per_day_reached"
     MAX_MESSAGES_PER_DAY_REACHED = "max_messages_per_day_reached"
     
+    # Salesrobot action limits
+    MAX_CONNECTION_REQUESTS_REACHED = "max_connection_requests_reached"
+    MAX_FOLLOW_UP_MESSAGES_REACHED = "max_follow_up_messages_reached"
+    MAX_VOICE_MESSAGES_REACHED = "max_voice_messages_reached"
+    MAX_VIDEO_MESSAGES_REACHED = "max_video_messages_reached"
+    MAX_PROFILE_VIEWS_REACHED = "max_profile_views_reached"
+    MAX_INMAIL_MESSAGES_REACHED = "max_inmail_messages_reached"
+    MAX_PROFILE_FOLLOWS_REACHED = "max_profile_follows_reached"
+    MAX_POST_LIKES_COMMENTS_REACHED = "max_post_likes_comments_reached"
+    MAX_ENDORSEMENTS_REACHED = "max_endorsements_reached"
+    MAX_WITHDRAW_CONNECTION_REQUESTS_REACHED = "max_withdraw_connection_requests_reached"
+    MAX_INVITE_TO_EVENT_REACHED = "max_invite_to_event_reached"
+    
     # Error-based stops
     ERROR_THRESHOLD_EXCEEDED = "error_threshold_exceeded"
     CRITICAL_ERROR = "critical_error"
@@ -105,6 +118,18 @@ class StopRulesManager:
             'messages_sent_today': 0,
             'error_count': 0,
             'last_reset': datetime.now().isoformat(),
+            # Salesrobot action counters
+            'connection_requests_today': 0,
+            'follow_up_messages_today': 0,
+            'voice_messages_today': 0,
+            'video_messages_today': 0,
+            'profile_views_today': 0,
+            'inmail_messages_today': 0,
+            'profile_follows_today': 0,
+            'post_likes_comments_today': 0,
+            'endorsements_today': 0,
+            'withdraw_connection_requests_today': 0,
+            'invite_to_event_today': 0,
         }
         self._initialize_default_rules()
     
@@ -150,6 +175,117 @@ class StopRulesManager:
             lambda ctx: (
                 ctx.get('messages_sent_today', 0) >= ctx.get('max_messages_per_day', 200),
                 f"Max messages per day reached: {ctx.get('messages_sent_today', 0)}/{ctx.get('max_messages_per_day', 200)}"
+            ),
+        ))
+        
+        # Salesrobot action limit rules
+        self.add_rule(StopRule(
+            StopRuleType.MAX_CONNECTION_REQUESTS_REACHED,
+            "Max Connection Requests",
+            "Maximum connection requests per day limit reached",
+            lambda ctx: (
+                ctx.get('connection_requests_today', 0) >= ctx.get('max_connection_requests_per_day', 20),
+                f"Max connection requests reached: {ctx.get('connection_requests_today', 0)}/{ctx.get('max_connection_requests_per_day', 20)}"
+            ),
+        ))
+        
+        self.add_rule(StopRule(
+            StopRuleType.MAX_FOLLOW_UP_MESSAGES_REACHED,
+            "Max Follow-Up Messages",
+            "Maximum follow-up messages per day limit reached",
+            lambda ctx: (
+                ctx.get('follow_up_messages_today', 0) >= ctx.get('max_follow_up_messages_per_day', 20),
+                f"Max follow-up messages reached: {ctx.get('follow_up_messages_today', 0)}/{ctx.get('max_follow_up_messages_per_day', 20)}"
+            ),
+        ))
+        
+        self.add_rule(StopRule(
+            StopRuleType.MAX_VOICE_MESSAGES_REACHED,
+            "Max Voice Messages",
+            "Maximum voice messages per day limit reached",
+            lambda ctx: (
+                ctx.get('voice_messages_today', 0) >= ctx.get('max_voice_messages_per_day', 20),
+                f"Max voice messages reached: {ctx.get('voice_messages_today', 0)}/{ctx.get('max_voice_messages_per_day', 20)}"
+            ),
+        ))
+        
+        self.add_rule(StopRule(
+            StopRuleType.MAX_VIDEO_MESSAGES_REACHED,
+            "Max Video Messages",
+            "Maximum video messages per day limit reached",
+            lambda ctx: (
+                ctx.get('video_messages_today', 0) >= ctx.get('max_video_messages_per_day', 20),
+                f"Max video messages reached: {ctx.get('video_messages_today', 0)}/{ctx.get('max_video_messages_per_day', 20)}"
+            ),
+        ))
+        
+        self.add_rule(StopRule(
+            StopRuleType.MAX_PROFILE_VIEWS_REACHED,
+            "Max Profile Views",
+            "Maximum profile views per day limit reached",
+            lambda ctx: (
+                ctx.get('profile_views_today', 0) >= ctx.get('max_profile_views_per_day', 20),
+                f"Max profile views reached: {ctx.get('profile_views_today', 0)}/{ctx.get('max_profile_views_per_day', 20)}"
+            ),
+        ))
+        
+        self.add_rule(StopRule(
+            StopRuleType.MAX_INMAIL_MESSAGES_REACHED,
+            "Max InMail Messages",
+            "Maximum InMail messages per day limit reached",
+            lambda ctx: (
+                ctx.get('inmail_messages_today', 0) >= ctx.get('max_inmail_messages_per_day', 20),
+                f"Max InMail messages reached: {ctx.get('inmail_messages_today', 0)}/{ctx.get('max_inmail_messages_per_day', 20)}"
+            ),
+        ))
+        
+        self.add_rule(StopRule(
+            StopRuleType.MAX_PROFILE_FOLLOWS_REACHED,
+            "Max Profile Follows",
+            "Maximum profile follows per day limit reached",
+            lambda ctx: (
+                ctx.get('profile_follows_today', 0) >= ctx.get('max_profile_follows_per_day', 20),
+                f"Max profile follows reached: {ctx.get('profile_follows_today', 0)}/{ctx.get('max_profile_follows_per_day', 20)}"
+            ),
+        ))
+        
+        self.add_rule(StopRule(
+            StopRuleType.MAX_POST_LIKES_COMMENTS_REACHED,
+            "Max Post Likes & Comments",
+            "Maximum post likes & comments per day limit reached",
+            lambda ctx: (
+                ctx.get('post_likes_comments_today', 0) >= ctx.get('max_post_likes_comments_per_day', 20),
+                f"Max post likes & comments reached: {ctx.get('post_likes_comments_today', 0)}/{ctx.get('max_post_likes_comments_per_day', 20)}"
+            ),
+        ))
+        
+        self.add_rule(StopRule(
+            StopRuleType.MAX_ENDORSEMENTS_REACHED,
+            "Max Endorsements",
+            "Maximum endorsements per day limit reached",
+            lambda ctx: (
+                ctx.get('endorsements_today', 0) >= ctx.get('max_endorsements_per_day', 20),
+                f"Max endorsements reached: {ctx.get('endorsements_today', 0)}/{ctx.get('max_endorsements_per_day', 20)}"
+            ),
+        ))
+        
+        self.add_rule(StopRule(
+            StopRuleType.MAX_WITHDRAW_CONNECTION_REQUESTS_REACHED,
+            "Max Withdraw Connection Requests",
+            "Maximum withdraw connection requests per day limit reached",
+            lambda ctx: (
+                ctx.get('withdraw_connection_requests_today', 0) >= ctx.get('max_withdraw_connection_requests_per_day', 10),
+                f"Max withdraw connection requests reached: {ctx.get('withdraw_connection_requests_today', 0)}/{ctx.get('max_withdraw_connection_requests_per_day', 10)}"
+            ),
+        ))
+        
+        self.add_rule(StopRule(
+            StopRuleType.MAX_INVITE_TO_EVENT_REACHED,
+            "Max Invite to Event",
+            "Maximum invite to event per day limit reached",
+            lambda ctx: (
+                ctx.get('invite_to_event_today', 0) >= ctx.get('max_invite_to_event_per_day', 30),
+                f"Max invite to event reached: {ctx.get('invite_to_event_today', 0)}/{ctx.get('max_invite_to_event_per_day', 30)}"
             ),
         ))
         
@@ -318,6 +454,18 @@ class StopRulesManager:
         self.global_state['leads_processed_today'] = 0
         self.global_state['messages_sent_today'] = 0
         self.global_state['error_count'] = 0
+        # Reset Salesrobot action counters
+        self.global_state['connection_requests_today'] = 0
+        self.global_state['follow_up_messages_today'] = 0
+        self.global_state['voice_messages_today'] = 0
+        self.global_state['video_messages_today'] = 0
+        self.global_state['profile_views_today'] = 0
+        self.global_state['inmail_messages_today'] = 0
+        self.global_state['profile_follows_today'] = 0
+        self.global_state['post_likes_comments_today'] = 0
+        self.global_state['endorsements_today'] = 0
+        self.global_state['withdraw_connection_requests_today'] = 0
+        self.global_state['invite_to_event_today'] = 0
         self.global_state['last_reset'] = datetime.now().isoformat()
         logger.info("Reset daily counters")
     
