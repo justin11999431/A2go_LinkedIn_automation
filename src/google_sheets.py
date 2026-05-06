@@ -140,7 +140,7 @@ class GoogleSheetsClient:
                 body=body
             ).execute()
             
-            logger.info(f"Updated {result.get('updates').get('updatedRows')} rows in sheet {sheet_id}")
+            logger.info(f"Updated {result.get('updatedRows')} rows in sheet {sheet_id}")
         except HttpError as e:
             logger.error(f"Error updating sheet {sheet_id}: {e}")
             raise

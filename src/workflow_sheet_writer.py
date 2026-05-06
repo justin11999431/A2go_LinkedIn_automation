@@ -15,32 +15,31 @@ class WorkflowSheetWriter:
     # Workflow sheet column mapping (internal field -> column name)
     WORKFLOW_COLUMN_MAP = {
         'lead_id': 'Lead ID',
+        'linkedin_url': 'LinkedIn Profile URL',
         'first_name': 'First Name',
         'last_name': 'Last Name',
-        'email': 'Email',
         'company': 'Company',
         'title': 'Title',
-        'linkedin_url': 'LinkedIn URL',
         'industry': 'Industry',
         'location': 'Location',
-        'phone': 'Phone',
-        'status': 'Automation Status',
-        'campaign': 'Campaign Name',
-        'priority': 'Priority',
-        'tags': 'Tags',
-        'created_at': 'Created At',
-        'updated_at': 'Updated At',
-        'last_synced_at': 'Last Synced At',
-        'human_notes': 'Notes',
-        'human_status': 'Human Status',
-        'human_priority': 'Human Priority',
-        'human_tags': 'Human Tags',
-        'last_human_update': 'Owner Last Action Date',
-        'manual_stop': 'Manual Stop',
-        'opt_out_requested': 'Opt-Out / Do Not Contact',
-        'negative_feedback': 'Negative Feedback',
-        'complaint_risk': 'Complaint Risk',
-        'account_issue': 'Account Issue',
+        'connection_status': 'Connection Status',
+        'current_step': 'Current Step',
+        'step_status': 'Step Status',
+        'last_action_date': 'Last Action Date',
+        'next_action_date': 'Next Action Date',
+        'connection_request_message': 'Connection Request Message',
+        'first_follow_up_message': 'First Follow-up Message',
+        'second_follow_up_message': 'Second Follow-up Message',
+        'third_follow_up_message': 'Third Follow-up Message',
+        'fourth_follow_up_message': 'Fourth Follow-up Message',
+        'fifth_follow_up_message': 'Fifth Follow-up Message',
+        'sixth_follow_up_message': 'Sixth Follow-up Message',
+        'seventh_follow_up_message': 'Seventh Follow-up Message',
+        'eighth_follow_up_message': 'Eighth Follow-up Message',
+        'ninth_follow_up_message': 'Ninth Follow-up Message',
+        'tenth_follow_up_message': 'Tenth Follow-up Message',
+        'notes': 'Notes',
+        'last_updated': 'Last Updated',
     }
     
     @staticmethod
@@ -55,62 +54,62 @@ class WorkflowSheetWriter:
         """
         # Actual workflow sheet column order
         columns = [
-            'Lead ID',                    # 1
-            'Campaign Name',              # 2
-            'Salesrobot Campaign ID',     # 3
-            'Salesrobot Lead ID',         # 4
-            'Persona',                    # 5
-            'Personalization Note',      # 6
-            'Pain Point',                 # 7
-            'Offer / CTA',                # 8
-            'Connection Request Copy',   # 9
-            'Follow-Up 1 Copy',           # 10
-            'Follow-Up 2 Copy',           # 11
-            'Follow-Up 3 Copy',           # 12
-            'Automation Status',          # 13
-            'Connection Sent Date',       # 14
-            'Connection Accepted Date',   # 15
-            'Last Message Sent Date',     # 16
-            'Reply Status',               # 17
-            'Reply Text',                 # 18
-            'Human Response Detected',    # 19
-            'Human In Loop Owner',        # 20
-            'Owner Last Action Date',     # 21
-            'Meeting Booked',             # 22
-            'Opt-Out / Do Not Contact',   # 23
-            'Error Message',              # 24
-            'Last Synced At',             # 25
-            'Notes',                      # 26
+            'Lead ID',                    # 0
+            'LinkedIn Profile URL',       # 1
+            'First Name',                 # 2
+            'Last Name',                  # 3
+            'Company',                    # 4
+            'Title',                      # 5
+            'Industry',                   # 6
+            'Location',                   # 7
+            'Connection Status',           # 8
+            'Current Step',               # 9
+            'Step Status',                # 10
+            'Last Action Date',           # 11
+            'Next Action Date',           # 12
+            'Connection Request Message', # 13
+            'First Follow-up Message',    # 14
+            'Second Follow-up Message',   # 15
+            'Third Follow-up Message',    # 16
+            'Fourth Follow-up Message',   # 17
+            'Fifth Follow-up Message',    # 18
+            'Sixth Follow-up Message',   # 19
+            'Seventh Follow-up Message',  # 20
+            'Eighth Follow-up Message',   # 21
+            'Ninth Follow-up Message',    # 22
+            'Tenth Follow-up Message',   # 23
+            'Notes',                      # 24
+            'Last Updated',               # 25
         ]
         
         # Map internal fields to workflow sheet columns
         field_mapping = {
             'Lead ID': lead.get('lead_id', ''),
-            'Campaign Name': lead.get('campaign', 'A2go | Forecasting'),
-            'Salesrobot Campaign ID': lead.get('salesrobot_campaign_id', ''),
-            'Salesrobot Lead ID': lead.get('salesrobot_lead_id', ''),
-            'Persona': lead.get('title', ''),
-            'Personalization Note': lead.get('notes', ''),
-            'Pain Point': '',
-            'Offer / CTA': '',
-            'Connection Request Copy': '',
-            'Follow-Up 1 Copy': '',
-            'Follow-Up 2 Copy': '',
-            'Follow-Up 3 Copy': '',
-            'Automation Status': lead.get('status', 'new'),
-            'Connection Sent Date': lead.get('connection_sent_date', ''),
-            'Connection Accepted Date': lead.get('connection_accepted_date', ''),
-            'Last Message Sent Date': lead.get('last_message_sent_date', ''),
-            'Reply Status': lead.get('reply_status', ''),
-            'Reply Text': lead.get('reply_text', ''),
-            'Human Response Detected': lead.get('human_response_detected', ''),
-            'Human In Loop Owner': lead.get('human_in_loop_owner', ''),
-            'Owner Last Action Date': lead.get('last_human_update', ''),
-            'Meeting Booked': lead.get('meeting_booked', ''),
-            'Opt-Out / Do Not Contact': 'Yes' if lead.get('opt_out_requested') else 'No',
-            'Error Message': lead.get('error_message', ''),
-            'Last Synced At': lead.get('last_synced_at', ''),
-            'Notes': lead.get('human_notes', ''),
+            'LinkedIn Profile URL': lead.get('linkedin_url', ''),
+            'First Name': lead.get('first_name', ''),
+            'Last Name': lead.get('last_name', ''),
+            'Company': lead.get('company', ''),
+            'Title': lead.get('title', ''),
+            'Industry': lead.get('industry', ''),
+            'Location': lead.get('location', ''),
+            'Connection Status': lead.get('connection_status', ''),
+            'Current Step': lead.get('current_step', ''),
+            'Step Status': lead.get('step_status', ''),
+            'Last Action Date': lead.get('last_action_date', ''),
+            'Next Action Date': lead.get('next_action_date', ''),
+            'Connection Request Message': lead.get('connection_request_message', ''),
+            'First Follow-up Message': lead.get('first_follow_up_message', ''),
+            'Second Follow-up Message': lead.get('second_follow_up_message', ''),
+            'Third Follow-up Message': lead.get('third_follow_up_message', ''),
+            'Fourth Follow-up Message': lead.get('fourth_follow_up_message', ''),
+            'Fifth Follow-up Message': lead.get('fifth_follow_up_message', ''),
+            'Sixth Follow-up Message': lead.get('sixth_follow_up_message', ''),
+            'Seventh Follow-up Message': lead.get('seventh_follow_up_message', ''),
+            'Eighth Follow-up Message': lead.get('eighth_follow_up_message', ''),
+            'Ninth Follow-up Message': lead.get('ninth_follow_up_message', ''),
+            'Tenth Follow-up Message': lead.get('tenth_follow_up_message', ''),
+            'Notes': lead.get('notes', ''),
+            'Last Updated': lead.get('last_updated', ''),
         }
         
         # Create row in correct column order
@@ -150,31 +149,31 @@ class WorkflowSheetWriter:
         # Map workflow sheet columns to internal fields
         column_to_field = {
             'Lead ID': 'lead_id',
-            'Campaign Name': 'campaign',
-            'Salesrobot Campaign ID': 'salesrobot_campaign_id',
-            'Salesrobot Lead ID': 'salesrobot_lead_id',
-            'Persona': 'title',
-            'Personalization Note': 'notes',
-            'Pain Point': 'pain_point',
-            'Offer / CTA': 'offer_cta',
-            'Connection Request Copy': 'connection_request_copy',
-            'Follow-Up 1 Copy': 'follow_up_1_copy',
-            'Follow-Up 2 Copy': 'follow_up_2_copy',
-            'Follow-Up 3 Copy': 'follow_up_3_copy',
-            'Automation Status': 'status',
-            'Connection Sent Date': 'connection_sent_date',
-            'Connection Accepted Date': 'connection_accepted_date',
-            'Last Message Sent Date': 'last_message_sent_date',
-            'Reply Status': 'reply_status',
-            'Reply Text': 'reply_text',
-            'Human Response Detected': 'human_response_detected',
-            'Human In Loop Owner': 'human_in_loop_owner',
-            'Owner Last Action Date': 'last_human_update',
-            'Meeting Booked': 'meeting_booked',
-            'Opt-Out / Do Not Contact': 'opt_out_requested',
-            'Error Message': 'error_message',
-            'Last Synced At': 'last_synced_at',
-            'Notes': 'human_notes',
+            'LinkedIn Profile URL': 'linkedin_url',
+            'First Name': 'first_name',
+            'Last Name': 'last_name',
+            'Company': 'company',
+            'Title': 'title',
+            'Industry': 'industry',
+            'Location': 'location',
+            'Connection Status': 'connection_status',
+            'Current Step': 'current_step',
+            'Step Status': 'step_status',
+            'Last Action Date': 'last_action_date',
+            'Next Action Date': 'next_action_date',
+            'Connection Request Message': 'connection_request_message',
+            'First Follow-up Message': 'first_follow_up_message',
+            'Second Follow-up Message': 'second_follow_up_message',
+            'Third Follow-up Message': 'third_follow_up_message',
+            'Fourth Follow-up Message': 'fourth_follow_up_message',
+            'Fifth Follow-up Message': 'fifth_follow_up_message',
+            'Sixth Follow-up Message': 'sixth_follow_up_message',
+            'Seventh Follow-up Message': 'seventh_follow_up_message',
+            'Eighth Follow-up Message': 'eighth_follow_up_message',
+            'Ninth Follow-up Message': 'ninth_follow_up_message',
+            'Tenth Follow-up Message': 'tenth_follow_up_message',
+            'Notes': 'notes',
+            'Last Updated': 'last_updated',
         }
         
         for i, value in enumerate(row):

@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-"""Generate LinkedIn outreach copy using NVIDIA-hosted LLM."""
+"""Clear bad records from workflow sheet and regenerate copy correctly."""
 
 import os
 import sys
@@ -14,6 +13,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from google_sheets import GoogleSheetsClient
 from settings import Settings
+from openai import OpenAI
 
 # Configure logging
 logging.basicConfig(
@@ -23,11 +23,11 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # NVIDIA API Configuration
-NVIDIA_API_KEY = os.getenv('NVIDIA_API_KEY')
+NVIDIA_API_KEY = os.getenv('NVIDIA_API_KEY', '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')
 NVIDIA_BASE_URL = os.getenv('NVIDIA_BASE_URL', 'https://integrate.api.nvidia.com/v1')
 NVIDIA_MODEL = os.getenv('NVIDIA_MODEL', 'meta/llama-3.1-70b-instruct')
 
-# System prompt for B2B LinkedIn Outbound Strategist
+# System prompt (same as generate_copy.py)
 SYSTEM_PROMPT = """You are a senior B2B LinkedIn outbound strategist and copywriter specializing in supply chain, industrial manufacturing, distribution, OTIF improvement, and AI-enabled operations.
 
 <context>
@@ -157,7 +157,7 @@ For each message, include:
    - Timing
    - Message copy
    - Personalization token used
-   - Why this message works
+   - Why it works
 
 5. Optional Persona Adjustment
    If the lead's title is one of the following, slightly adjust the angle:
@@ -243,60 +243,54 @@ IMPORTANT: You must respond with valid JSON only. No markdown, no code blocks, n
 }"""
 
 
-def validate_nvidia_config() -> bool:
-    """Validate NVIDIA API configuration.
+def clear_bad_records(sheets_client: GoogleSheetsClient, workflow_sheet_id: str) -> bool:
+    """Clear bad records from workflow sheet (rows 2-105).
     
+    Args:
+        sheets_client: Google Sheets client
+        workflow_sheet_id: Workflow sheet ID
+        
     Returns:
-        True if configuration is valid
-    """
-    if not NVIDIA_API_KEY:
-        logger.error("NVIDIA_API_KEY environment variable not set")
-        return False
-    
-    if not NVIDIA_BASE_URL:
-        logger.error("NVIDIA_BASE_URL environment variable not set")
-        return False
-    
-    if not NVIDIA_MODEL:
-        logger.error("NVIDIA_MODEL environment variable not set")
-        return False
-    
-    return True
-
-
-def initialize_nvidia_client():
-    """Initialize NVIDIA OpenAI client.
-    
-    Returns:
-        OpenAI client or None
+        True if successful
     """
     try:
-        from openai import OpenAI
+        logger.info("Clearing bad records from rows 2-105...")
         
-        client = OpenAI(
-            base_url=NVIDIA_BASE_URL,
-            api_key=NVIDIA_API_KEY
-        )
+        # Clear rows 2-105 by writing empty values
+        empty_row = [''] * 26  # 26 columns
         
-        logger.info(f"Initialized NVIDIA client with model: {NVIDIA_MODEL}")
-        return client
-    except ImportError:
-        logger.error("OpenAI library not installed. Run: pip install openai")
-        return None
+        # Update each row individually to avoid rate limits
+        for row_num in range(2, 106):
+            try:
+                sheets_client.update_sheet_data(
+                    workflow_sheet_id,
+                    f'Sheet1!A{row_num}:Z{row_num}',
+                    [empty_row]
+                )
+                logger.info(f"Cleared row {row_num}")
+                time.sleep(0.5)  # Small delay between updates
+            except Exception as e:
+                logger.error(f"Error clearing row {row_num}: {e}")
+        
+        logger.info("Successfully cleared bad records")
+        return True
+        
     except Exception as e:
-        logger.error(f"Error initializing NVIDIA client: {e}")
-        return None
+        logger.error(f"Error clearing bad records: {e}")
+        return False
 
 
-def fetch_leads_needing_copy(sheets_client: GoogleSheetsClient, source_sheet_id: str) -> List[Dict[str, Any]]:
-    """Fetch leads that need copy generation.
+def fetch_leads_by_name(sheets_client: GoogleSheetsClient, source_sheet_id: str, 
+                        lead_names: List[str]) -> List[Dict[str, Any]]:
+    """Fetch specific leads by name.
     
     Args:
         sheets_client: Google Sheets client
         source_sheet_id: Source sheet ID
+        lead_names: List of lead names to fetch
         
     Returns:
-        List of leads needing copy
+        List of leads
     """
     try:
         # Fetch all leads from source sheet
@@ -337,18 +331,19 @@ def fetch_leads_needing_copy(sheets_client: GoogleSheetsClient, source_sheet_id:
             if not row or len(row) <= name_col:
                 continue
             
-            lead = {
-                'name': row[name_col] if name_col < len(row) else '',
-                'title': row[title_col] if title_col is not None and title_col < len(row) else '',
-                'company': row[company_col] if company_col is not None and company_col < len(row) else '',
-                'linkedin_url': row[linkedin_col] if linkedin_col is not None and linkedin_col < len(row) else '',
-            }
+            lead_name = row[name_col] if name_col < len(row) else ''
             
-            # Only include leads with at least a name
-            if lead['name']:
+            # Check if this lead is in our target list
+            if lead_name in lead_names:
+                lead = {
+                    'name': lead_name,
+                    'title': row[title_col] if title_col is not None and title_col < len(row) else '',
+                    'company': row[company_col] if company_col is not None and company_col < len(row) else '',
+                    'linkedin_url': row[linkedin_col] if linkedin_col is not None and linkedin_col < len(row) else '',
+                }
                 leads.append(lead)
         
-        logger.info(f"Found {len(leads)} leads needing copy generation")
+        logger.info(f"Found {len(leads)} matching leads")
         return leads
         
     except Exception as e:
@@ -425,225 +420,199 @@ Please generate the LinkedIn outreach copy following the system prompt requireme
         return None
 
 
-def update_workflow_sheet(sheets_client: GoogleSheetsClient, workflow_sheet_id: str,
+def update_workflow_sheet(sheets_client: GoogleSheetsClient, workflow_sheet_id: str, 
                           lead: Dict[str, Any], copy_data: Dict[str, Any]) -> bool:
     """Update workflow sheet with generated copy.
-
+    
     Args:
         sheets_client: Google Sheets client
         workflow_sheet_id: Workflow sheet ID
         lead: Lead data
         copy_data: Generated copy data
-
+        
     Returns:
         True if successful
     """
     try:
-        # Find the next empty row
-        sheet_data = sheets_client.get_sheet_data(workflow_sheet_id, 'Sheet1')
-
-        # Start from row 2 (after header, 1-based indexing)
-        next_row = 2
-        for i, row in enumerate(sheet_data[1:], start=2):  # Skip header row
-            # Check if row is empty (all cells are empty)
-            if not any(cell.strip() for cell in row if cell):
-                next_row = i
-                break
-        else:
-            # If all rows are filled, append to the end
-            next_row = len(sheet_data) + 1
-
         # Map copy data to workflow sheet columns
-        # Based on the actual workflow sheet schema
+        # Based on the workflow sheet schema, we need to map to the correct columns
         row = [
             lead.get('name', ''),  # Lead ID (using name as placeholder)
-            lead.get('linkedin_url', ''),  # LinkedIn Profile URL
-            lead.get('first_name', ''),  # First Name
-            lead.get('last_name', ''),  # Last Name
-            lead.get('company', ''),  # Company
-            lead.get('title', ''),  # Title
-            lead.get('industry', ''),  # Industry
-            lead.get('location', ''),  # Location
-            '',  # Connection Status
-            '',  # Current Step
-            '',  # Step Status
-            '',  # Last Action Date
-            '',  # Next Action Date
-            copy_data.get('connection_requests', {}).get('version_a_direct', ''),  # Connection Request Message
-            copy_data.get('dm_sequence', {}).get('message_1_rapport', {}).get('copy', ''),  # First Follow-up Message
-            copy_data.get('dm_sequence', {}).get('message_2_insight', {}).get('copy', ''),  # Second Follow-up Message
-            copy_data.get('dm_sequence', {}).get('message_3_problem_hypothesis', {}).get('copy', ''),  # Third Follow-up Message
-            copy_data.get('dm_sequence', {}).get('message_4_final_note', {}).get('copy', ''),  # Fourth Follow-up Message
-            '',  # Fifth Follow-up Message
-            '',  # Sixth Follow-up Message
-            '',  # Seventh Follow-up Message
-            '',  # Eighth Follow-up Message
-            '',  # Ninth Follow-up Message
-            '',  # Tenth Follow-up Message
+            'A2go | Forecasting',  # Campaign Name
+            '',  # Salesrobot Campaign ID
+            '',  # Salesrobot Lead ID
+            lead.get('title', ''),  # Persona
+            copy_data.get('research_summary', {}).get('personalization_angle', ''),  # Personalization Note
+            copy_data.get('research_summary', {}).get('otif_trigger', ''),  # Pain Point
+            '',  # Offer / CTA
+            copy_data.get('connection_requests', {}).get('version_a_direct', ''),  # Connection Request Copy
+            copy_data.get('dm_sequence', {}).get('message_1_rapport', {}).get('copy', ''),  # Follow-Up 1 Copy
+            copy_data.get('dm_sequence', {}).get('message_2_insight', {}).get('copy', ''),  # Follow-Up 2 Copy
+            copy_data.get('dm_sequence', {}).get('message_3_problem_hypothesis', {}).get('copy', ''),  # Follow-Up 3 Copy
+            'new',  # Automation Status
+            '',  # Connection Sent Date
+            '',  # Connection Accepted Date
+            '',  # Last Message Sent Date
+            '',  # Reply Status
+            '',  # Reply Text
+            '',  # Human Response Detected
+            '',  # Human In Loop Owner
+            datetime.now().isoformat(),  # Owner Last Action Date
+            '',  # Meeting Booked
+            'No',  # Opt-Out / Do Not Contact
+            '',  # Error Message
+            datetime.now().isoformat(),  # Last Synced At
             copy_data.get('research_summary', {}).get('notes', ''),  # Notes
-            datetime.now().isoformat(),  # Last Updated
         ]
-
-        # Update the specific row
-        range_name = f'Sheet1!A{next_row}:Z{next_row}'
-        logger.info(f"Updating workflow sheet for lead: {lead['name']} at row {next_row}")
-        sheets_client.update_sheet_data(workflow_sheet_id, range_name, [row])
-
-        logger.info(f"Successfully updated workflow sheet for lead: {lead['name']} at row {next_row}")
+        
+        # Append to workflow sheet
+        logger.info(f"Updating workflow sheet for lead: {lead['name']}")
+        sheets_client.append_sheet_data(workflow_sheet_id, 'Sheet1!A1', [row])
+        
+        logger.info(f"Successfully updated workflow sheet for lead: {lead['name']}")
         return True
-
+        
     except Exception as e:
         logger.error(f"Error updating workflow sheet for {lead['name']}: {e}")
         return False
 
 
-def generate_copy_for_all_leads(settings: Settings, max_leads: Optional[int] = None) -> Dict[str, Any]:
-    """Generate copy for all leads.
-    
-    Args:
-        settings: Settings object
-        max_leads: Maximum number of leads to process (for testing)
-        
-    Returns:
-        Generation results
-    """
-    results = {
-        'timestamp': datetime.now().isoformat(),
-        'total_leads': 0,
-        'processed_leads': 0,
-        'successful_leads': 0,
-        'failed_leads': 0,
-        'errors': [],
-    }
-    
-    try:
-        # Validate NVIDIA configuration
-        if not validate_nvidia_config():
-            return results
-        
-        # Initialize NVIDIA client
-        nvidia_client = initialize_nvidia_client()
-        if not nvidia_client:
-            return results
-        
-        # Initialize Google Sheets client
-        oauth_refresh_token = settings.get_oauth_refresh_token()
-        oauth_client_id = settings.get_oauth_client_id()
-        oauth_client_secret = settings.get_oauth_client_secret()
-        
-        if not oauth_refresh_token or not oauth_client_id or not oauth_client_secret:
-            logger.error("OAuth credentials not found in settings")
-            return results
-        
-        sheets_client = GoogleSheetsClient(
-            oauth_refresh_token=oauth_refresh_token,
-            client_id=oauth_client_id,
-            client_secret=oauth_client_secret
-        )
-        
-        # Get sheet IDs
-        source_sheet_id = settings.get_source_sheet_id()
-        workflow_sheet_id = settings.get_workflow_sheet_id()
-        
-        if not source_sheet_id or not workflow_sheet_id:
-            logger.error("Source or workflow sheet ID not found in settings")
-            return results
-        
-        # Fetch leads needing copy
-        leads = fetch_leads_needing_copy(sheets_client, source_sheet_id)
-        
-        if not leads:
-            logger.warning("No leads found needing copy generation")
-            return results
-        
-        results['total_leads'] = len(leads)
-        
-        # Limit leads for testing if specified
-        if max_leads and max_leads < len(leads):
-            leads = leads[:max_leads]
-            logger.info(f"Limited to {max_leads} leads for testing")
-        
-        # Generate copy for each lead
-        for i, lead in enumerate(leads, start=1):
-            logger.info(f"Processing lead {i}/{len(leads)}: {lead['name']}")
-            results['processed_leads'] += 1
-            
-            # Generate copy
-            copy_data = generate_copy_for_lead(nvidia_client, lead)
-            
-            if copy_data:
-                # Update workflow sheet
-                if update_workflow_sheet(sheets_client, workflow_sheet_id, lead, copy_data):
-                    results['successful_leads'] += 1
-                else:
-                    results['failed_leads'] += 1
-                    results['errors'].append({
-                        'lead_name': lead['name'],
-                        'error': 'Failed to update workflow sheet'
-                    })
-            else:
-                results['failed_leads'] += 1
-                results['errors'].append({
-                    'lead_name': lead['name'],
-                    'error': 'Failed to generate copy'
-                })
-            
-            # Rate limiting between API calls
-            if i < len(leads):
-                logger.info("Waiting 2 seconds before next lead...")
-                time.sleep(2)
-        
-        logger.info(f"Copy generation complete: {results['successful_leads']}/{results['processed_leads']} successful")
-        
-    except Exception as e:
-        logger.error(f"Error during copy generation: {e}")
-        results['errors'].append({
-            'error': str(e)
-        })
-    
-    return results
-
-
 def main():
     """Main entry point."""
-    import argparse
-    
-    parser = argparse.ArgumentParser(description='Generate LinkedIn outreach copy using NVIDIA LLM')
-    parser.add_argument('--max-leads', type=int, help='Maximum number of leads to process (for testing)')
-    parser.add_argument('--dry-run', action='store_true', help='Run in dry-run mode (no API calls)')
-    args = parser.parse_args()
-    
     # Load settings
     settings = Settings()
     
-    if args.dry_run:
-        logger.info("Running in dry-run mode (no API calls)")
-        logger.info("This would process leads and generate copy using NVIDIA LLM")
-        logger.info(f"Max leads: {args.max_leads if args.max_leads else 'unlimited'}")
+    # Initialize NVIDIA client
+    nvidia_client = OpenAI(
+        base_url=NVIDIA_BASE_URL,
+        api_key=NVIDIA_API_KEY
+    )
+    
+    # Initialize Google Sheets client
+    oauth_refresh_token = settings.get_oauth_refresh_token()
+    oauth_client_id = settings.get_oauth_client_id()
+    oauth_client_secret = settings.get_oauth_client_secret()
+    
+    if not oauth_refresh_token or not oauth_client_id or not oauth_client_secret:
+        logger.error("OAuth credentials not found in settings")
         return
     
-    # Run copy generation
-    results = generate_copy_for_all_leads(settings, args.max_leads)
+    sheets_client = GoogleSheetsClient(
+        oauth_refresh_token=oauth_refresh_token,
+        client_id=oauth_client_id,
+        client_secret=oauth_client_secret
+    )
     
-    # Print results
-    print("\n" + "="*60)
-    print("COPY GENERATION RESULTS")
-    print("="*60)
-    print(f"Timestamp: {results['timestamp']}")
-    print(f"Total Leads: {results['total_leads']}")
-    print(f"Processed Leads: {results['processed_leads']}")
-    print(f"Successful Leads: {results['successful_leads']}")
-    print(f"Failed Leads: {results['failed_leads']}")
+    # Get sheet IDs
+    source_sheet_id = settings.get_source_sheet_id()
+    workflow_sheet_id = settings.get_workflow_sheet_id()
     
-    if results['errors']:
-        print(f"\nErrors: {len(results['errors'])}")
-        for error in results['errors']:
-            print(f"  - {error}")
+    if not source_sheet_id or not workflow_sheet_id:
+        logger.error("Source or workflow sheet ID not found in settings")
+        return
     
-    print("="*60 + "\n")
+    # Step 1: Clear bad records
+    print("\n" + "="*80)
+    print("STEP 1: Clearing bad records from workflow sheet...")
+    print("="*80)
     
-    # Exit with appropriate code
-    sys.exit(0 if results['failed_leads'] == 0 else 1)
+    if not clear_bad_records(sheets_client, workflow_sheet_id):
+        print("Failed to clear bad records. Please check the sheet manually.")
+        return
+    
+    print("✓ Bad records cleared successfully")
+    
+    # Step 2: Get first 3 leads from source sheet
+    print("\n" + "="*80)
+    print("STEP 2: Fetching first 3 leads from source sheet...")
+    print("="*80)
+    
+    data = sheets_client.get_sheet_data(source_sheet_id, 'A2go-Forecast-Intent-75!A1:Z5')
+    
+    if not data or len(data) < 2:
+        logger.error("No data found in source sheet")
+        return
+    
+    headers = data[0]
+    rows = data[1:]
+    
+    # Find name column
+    name_col = None
+    for i, header in enumerate(headers):
+        if 'name' in header.lower() and 'first' not in header.lower() and 'last' not in header.lower():
+            name_col = i
+            break
+    
+    if name_col is None:
+        logger.error("Could not find Name column")
+        return
+    
+    # Get first 3 lead names
+    lead_names = []
+    for row in rows[:3]:
+        if row and len(row) > name_col:
+            lead_names.append(row[name_col])
+    
+    print(f"Found {len(lead_names)} leads: {lead_names}")
+    
+    # Step 3: Fetch leads by name
+    print("\n" + "="*80)
+    print("STEP 3: Fetching lead details...")
+    print("="*80)
+    
+    leads = fetch_leads_by_name(sheets_client, source_sheet_id, lead_names)
+    
+    if not leads:
+        print("No leads found")
+        return
+    
+    # Step 4: Generate copy for each lead
+    print("\n" + "="*80)
+    print("STEP 4: Generating copy for each lead...")
+    print("="*80)
+    
+    for i, lead in enumerate(leads, start=1):
+        print(f"\nProcessing lead {i}/{len(leads)}: {lead['name']}")
+        
+        # Generate copy
+        copy_data = generate_copy_for_lead(nvidia_client, lead)
+        
+        if copy_data:
+            # Update workflow sheet
+            update_workflow_sheet(sheets_client, workflow_sheet_id, lead, copy_data)
+            print(f"\n{'='*60}")
+            print(f"Generated copy for: {lead['name']}")
+            print(f"{'='*60}")
+            print(f"\nResearch Summary:")
+            print(f"  Name: {copy_data.get('research_summary', {}).get('prospect_name', 'N/A')}")
+            print(f"  Title: {copy_data.get('research_summary', {}).get('title', 'N/A')}")
+            print(f"  Company: {copy_data.get('research_summary', {}).get('company', 'N/A')}")
+            print(f"  OTIF Trigger: {copy_data.get('research_summary', {}).get('otif_trigger', 'N/A')}")
+            print(f"  Confidence: {copy_data.get('research_summary', {}).get('confidence_level', 'N/A')}")
+            print(f"\nConnection Request A:")
+            print(f"  {copy_data.get('connection_requests', {}).get('version_a_direct', 'N/A')}")
+            print(f"\nConnection Request B:")
+            print(f"  {copy_data.get('connection_requests', {}).get('version_b_contextual', 'N/A')}")
+            print(f"\nDM Message 1:")
+            print(f"  {copy_data.get('dm_sequence', {}).get('message_1_rapport', {}).get('copy', 'N/A')}")
+            print(f"\nDM Message 2:")
+            print(f"  {copy_data.get('dm_sequence', {}).get('message_2_insight', {}).get('copy', 'N/A')}")
+            print(f"\nDM Message 3:")
+            print(f"  {copy_data.get('dm_sequence', {}).get('message_3_problem_hypothesis', {}).get('copy', 'N/A')}")
+            print(f"\nDM Message 4:")
+            print(f"  {copy_data.get('dm_sequence', {}).get('message_4_final_note', {}).get('copy', 'N/A')}")
+            print(f"\n{'='*60}\n")
+        else:
+            print(f"Failed to generate copy for {lead['name']}")
+        
+        # Rate limiting between API calls
+        if i < len(leads):
+            logger.info("Waiting 2 seconds before next lead...")
+            time.sleep(2)
+    
+    print("\n" + "="*80)
+    print("✓ Copy generation complete!")
+    print("="*80)
 
 
 if __name__ == '__main__':
