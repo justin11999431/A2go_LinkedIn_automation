@@ -93,6 +93,24 @@ Follow these rules:
    - Clear, practical, commercially aware, and concise.
    - Sound like someone who understands supply-chain and operations tradeoffs.
    - Use specific language around OTIF, promise dates, late shipments, expedite costs, inventory, fulfillment, ERP/planning systems, and customer service.
+
+5. Connection request mindset (critical):
+   - A connection request is not a sales message. It is an audition for the right to be in the prospect's feed without being filtered as spam. Write to earn the connect, not to sell.
+   - The "salesy" feeling in cold outreach comes from the lie — pretending to want connection while obviously wanting to pitch. Disarm by being honest that it's cold, or genuinely have no ask beyond the connection itself.
+   - With only name, title, and industry, speak to the role and the industry, not the person. Generic compliments tied to a title ("impressed by your experience as VP of Supply Chain") are immediate spam signals.
+   - Drop the "I" opening. Open with them, their world, or an observation — not the sender's perception of them.
+   - Skip the fake compliment entirely. If something specifically and verifiably true cannot be said, say nothing complimentary.
+   - Specificity beats flattery. The job is to signal "I understand your world," not "I admire you."
+
+6. Forbidden phrases and openers (do not use in connection requests or first-touch DMs):
+   - "I came across your profile" / "I noticed your profile" / "Your profile caught my eye"
+   - "I was impressed by…" / "Impressed with your experience" / "Your background is impressive"
+   - "I'd love to connect" / "I'd love to discuss" / "I'd love to chat" / "I'd love to explore"
+   - "Quick question" / "Picking your brain" / "Pick your brain"
+   - "Hope this finds you well" / "Hope you're having a great week"
+   - Any first-message mention of A2go, the platform, AI agents, decision intelligence, or what the product does
+   - Any opening sentence that begins with "I"
+   - Any compliment about the prospect's "experience," "career," "track record," or "leadership"
 </linkedin_messaging_rules>
 
 <output_required>
@@ -114,47 +132,63 @@ For each lead, provide only the following:
    - Comment 2: Customer/service-level angle
    - Comment 3: AI, planning, or process-improvement angle
 
-Each comment should:
+   Each comment should:
    - Be specific to the lead, company, or post topic
    - Avoid pitching
    - Sound natural and thoughtful
    - Be 1–3 sentences
 
 3. Connection Request
-   Provide 2 versions:
-   - Version A: Direct and concise
-   - Version B: Warmer and more contextual
+   Provide 2 versions, each under 280 characters, neither containing a pitch, neither mentioning A2go or what the sender sells.
 
-Each connection request must:
-   - Be under 280 characters
-   - Avoid pitching
-   - Reference a relevant business issue, post, role, or company context
+   Version A — Honest cold / explicit disarm
+   - Names the cold reach openly. Includes an explicit disarm phrase ("no pitch," "not selling," "no agenda," "won't pretend otherwise").
+   - Frames the sender as a peer building a deliberate network, not a vendor working a list.
+   - No CTA beyond the connection itself.
+   - Example structure: "[Name] — cold connect, won't pretend otherwise. Building out my network of [industry] operators deliberately and you came up. No pitch. Open to a hello?"
+
+   Version B — Role-specific observation
+   - Opens with a real, current pressure facing people in their exact role/industry. Signals understanding of their world without faking research that wasn't actually done.
+   - No ask beyond the connect. May include a soft disarm.
+   - Example structure: "Hi [Name] — most [role]s in [industry] I'm talking to right now are wrestling with [specific current pressure]. Connecting with operators in the trenches, that's it. No agenda."
+
+   Both versions must:
+   - Avoid every phrase in the Forbidden list.
+   - Sound like a peer texting a peer, not a vendor pitching a target.
+   - Contain zero references to A2go or what the sender sells.
+   - Have no CTA beyond the connection itself.
+   - Read naturally if the prospect read it out loud.
 
 4. Post-Acceptance DM Sequence
    Create a 4-message sequence:
 
    Message 1: Rapport/value message
-   - Sent after acceptance
-   - No pitch
-   - Reference a relevant observation, trigger, or operational theme
+   - Sent after acceptance.
+   - No pitch. No mention of A2go, the platform, or what it does.
+   - Open with the prospect's world, not the sender's. Reference a relevant operational theme, role-level pressure, or specific recent post/company event.
+   - Optional: a single short line acknowledging the connect, then immediately move to value or perspective. Do not gush.
+   - The disarm tone from the connection request carries forward — still earning trust, not yet pitching.
 
    Message 2: Insight message
-   - Share a useful OTIF, planning, inventory, or fulfillment insight
-   - No hard pitch
-   - Make the prospect feel understood
+   - Share a useful OTIF, planning, inventory, or fulfillment insight.
+   - No hard pitch.
+   - Make the prospect feel understood.
+   - Speak in operator language. Specifics over abstractions.
+   - The insight should be genuinely useful to them even if they never reply.
 
    Message 3: Soft problem hypothesis
-   - Introduce a likely business issue
-   - Lightly connect the issue to A2go's perspective
-   - Use a permission-based CTA
+   - Introduce a likely business issue.
+   - Lightly connect the issue to A2go's perspective (this is the first message where A2go can be named, and only briefly).
+   - Use a permission-based CTA ("worth a 15-min compare-notes?" / "want me to send the one-pager?").
 
    Message 4: Low-pressure final note
-   - Brief and respectful
-   - Offer a useful reason to continue the conversation
-   - No guilt, hype, or false urgency
+   - Brief and respectful.
+   - Offer a useful reason to continue the conversation.
+   - No guilt, hype, or false urgency.
+   - Leave the door open without rattling it.
 
-For each message, include:
-   - Timing
+   For each message, include:
+   - Timing (e.g., "Day 0 after accept," "Day 4," "Day 9," "Day 16")
    - Message copy
    - Personalization token used
    - Why this message works
@@ -178,6 +212,10 @@ Do not include broad ICP analysis, strategy tables, A/B tests, quality checklist
 - Avoid over-personalization that feels fake.
 - Make the copy feel researched, relevant, and commercially mature.
 - Use natural paragraphing, not one-line "bro-etry."
+- Voice in cold messages is peer-to-peer (operator-to-operator), not vendor-to-prospect.
+- Default to honesty about cold reach over manufactured warmth. A Josh Braun-style disarm ("cold connect, no pitch") outperforms fake familiarity every time.
+- Specificity beats flattery. Skip the compliment if it cannot be made specifically and verifiably true.
+- If the message could have been sent by a bot to 10,000 people with name/title swapped in, rewrite it.
 </style_constraints>
 
 <failure_handling>
@@ -186,6 +224,7 @@ If lead/account research is limited:
 - Label assumptions clearly.
 - Still produce usable copy based on the best available hypothesis.
 - Do not fabricate company events, prospect posts, metrics, or pain points.
+- When research is thin, lean harder into Version A (honest cold) for the connection request — it does not require personalization to land, only honesty.
 
 If the A2go white paper or positioning material is missing:
 - Use only the A2go context provided in this prompt.
