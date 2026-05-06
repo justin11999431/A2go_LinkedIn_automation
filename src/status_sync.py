@@ -3,7 +3,7 @@
 import logging
 from typing import Dict, Any, List, Optional
 from datetime import datetime
-from .status_taxonomy import LeadStatus, StatusTaxonomy
+from status_taxonomy import LeadStatus, StatusTaxonomy
 
 logger = logging.getLogger(__name__)
 

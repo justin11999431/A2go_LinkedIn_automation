@@ -10,6 +10,8 @@ try:
     from googleapiclient.discovery import build
     from googleapiclient.errors import HttpError
     from google.oauth2 import service_account
+    from google.oauth2.credentials import Credentials
+    from google.auth.transport.requests import Request
     GOOGLE_AVAILABLE = True
 except ImportError:
     GOOGLE_AVAILABLE = False
@@ -20,11 +22,17 @@ logger = logging.getLogger(__name__)
 class GoogleSheetsClient:
     """Client for interacting with Google Sheets API."""
     
-    def __init__(self, credentials_json: Optional[str] = None):
+    def __init__(self, credentials_json: Optional[str] = None, 
+                 oauth_refresh_token: Optional[str] = None,
+                 client_id: Optional[str] = None,
+                 client_secret: Optional[str] = None):
         """Initialize Google Sheets client.
         
         Args:
             credentials_json: JSON string of service account credentials
+            oauth_refresh_token: OAuth 2.0 refresh token
+            client_id: OAuth 2.0 client ID
+            client_secret: OAuth 2.0 client secret
         """
         if not GOOGLE_AVAILABLE:
             raise ImportError("Google API libraries not installed. Run: pip install google-api-python-client")
@@ -33,10 +41,12 @@ class GoogleSheetsClient:
         self.service = None
         
         if credentials_json:
-            self._authenticate(credentials_json)
+            self._authenticate_service_account(credentials_json)
+        elif oauth_refresh_token and client_id and client_secret:
+            self._authenticate_oauth(oauth_refresh_token, client_id, client_secret)
     
-    def _authenticate(self, credentials_json: str) -> None:
-        """Authenticate with Google Sheets API.
+    def _authenticate_service_account(self, credentials_json: str) -> None:
+        """Authenticate with Google Sheets API using service account.
         
         Args:
             credentials_json: JSON string of service account credentials
@@ -48,9 +58,38 @@ class GoogleSheetsClient:
                 scopes=['https://www.googleapis.com/auth/spreadsheets']
             )
             self.service = build('sheets', 'v4', credentials=self.credentials)
-            logger.info("Successfully authenticated with Google Sheets API")
+            logger.info("Successfully authenticated with Google Sheets API (Service Account)")
         except Exception as e:
             logger.error(f"Failed to authenticate with Google Sheets: {e}")
+            raise
+    
+    def _authenticate_oauth(self, refresh_token: str, client_id: str, client_secret: str) -> None:
+        """Authenticate with Google Sheets API using OAuth 2.0.
+        
+        Args:
+            refresh_token: OAuth 2.0 refresh token
+            client_id: OAuth 2.0 client ID
+            client_secret: OAuth 2.0 client secret
+        """
+        try:
+            # Create credentials from refresh token
+            self.credentials = Credentials(
+                token=None,
+                refresh_token=refresh_token,
+                token_uri="https://oauth2.googleapis.com/token",
+                client_id=client_id,
+                client_secret=client_secret,
+                scopes=['https://www.googleapis.com/auth/spreadsheets']
+            )
+            
+            # Refresh the token
+            self.credentials.refresh(Request())
+            
+            # Build service
+            self.service = build('sheets', 'v4', credentials=self.credentials)
+            logger.info("Successfully authenticated with Google Sheets API (OAuth 2.0)")
+        except Exception as e:
+            logger.error(f"Failed to authenticate with Google Sheets OAuth: {e}")
             raise
     
     def get_sheet_data(self, sheet_id: str, range_name: str) -> List[List[Any]]:

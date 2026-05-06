@@ -192,6 +192,48 @@ class Settings:
         # Check settings file
         return self.get('google.service_account_json')
     
+    def get_oauth_refresh_token(self) -> Optional[str]:
+        """Get OAuth 2.0 refresh token.
+        
+        Returns:
+            OAuth refresh token or None
+        """
+        # Check environment variable first
+        env_token = os.getenv('OAUTH_REFRESH_TOKEN')
+        if env_token:
+            return env_token
+        
+        # Check settings file
+        return self.get('google.oauth_refresh_token')
+    
+    def get_oauth_client_id(self) -> Optional[str]:
+        """Get OAuth 2.0 client ID.
+        
+        Returns:
+            OAuth client ID or None
+        """
+        # Check environment variable first
+        env_id = os.getenv('OAUTH_CLIENT_ID')
+        if env_id:
+            return env_id
+        
+        # Check settings file
+        return self.get('google.oauth_client_id')
+    
+    def get_oauth_client_secret(self) -> Optional[str]:
+        """Get OAuth 2.0 client secret.
+        
+        Returns:
+            OAuth client secret or None
+        """
+        # Check environment variable first
+        env_secret = os.getenv('OAUTH_CLIENT_SECRET')
+        if env_secret:
+            return env_secret
+        
+        # Check settings file
+        return self.get('google.oauth_client_secret')
+    
     def get_salesrobot_api_key(self) -> Optional[str]:
         """Get Salesrobot API key.
         
@@ -205,6 +247,20 @@ class Settings:
         
         # Check settings file
         return self.get('salesrobot.api_key')
+    
+    def get_linkedin_account_uuid(self) -> Optional[str]:
+        """Get LinkedIn account UUID.
+        
+        Returns:
+            LinkedIn account UUID or None
+        """
+        # Check environment variable first
+        env_uuid = os.getenv('LINKEDIN_ACCOUNT_UUID')
+        if env_uuid:
+            return env_uuid
+        
+        # Check settings file
+        return self.get('salesrobot.linkedin_account_uuid')
     
     def get_source_sheet_id(self) -> Optional[str]:
         """Get source Google Sheet ID.

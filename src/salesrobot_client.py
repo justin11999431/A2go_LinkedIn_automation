@@ -17,13 +17,14 @@ logger = logging.getLogger(__name__)
 class SalesrobotClient:
     """Client for interacting with Salesrobot API."""
     
-    BASE_URL = "https://api.salesrobot.io/v1"
+    BASE_URL = "https://app.salesrobot.co/api"
     
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: Optional[str] = None, linkedin_account_uuid: Optional[str] = None):
         """Initialize Salesrobot client.
         
         Args:
             api_key: Salesrobot API key
+            linkedin_account_uuid: LinkedIn account UUID (required for most operations)
         """
         if not REQUESTS_AVAILABLE:
             raise ImportError("Requests library not installed. Run: pip install requests")
@@ -32,8 +33,10 @@ class SalesrobotClient:
         if not self.api_key:
             raise ValueError("API key required. Set SALESROBOT_API_KEY environment variable or pass api_key parameter.")
         
+        self.linkedin_account_uuid = linkedin_account_uuid or os.getenv('LINKEDIN_ACCOUNT_UUID')
+        
         self.headers = {
-            'Authorization': f'Bearer {self.api_key}',
+            'X-API-Key': self.api_key,
             'Content-Type': 'application/json'
         }
     
@@ -68,13 +71,34 @@ class SalesrobotClient:
             logger.error(f"API request failed: {e}")
             raise
     
+    def get_linkedin_accounts(self) -> List[Dict[str, Any]]:
+        """Get all LinkedIn accounts.
+        
+        Returns:
+            List of LinkedIn accounts
+        """
+        return self._make_request('GET', '/linkedinAccounts')
+    
     def get_campaigns(self) -> List[Dict[str, Any]]:
         """Get all campaigns.
         
         Returns:
             List of campaigns
         """
-        return self._make_request('GET', '/campaigns')
+        if not self.linkedin_account_uuid:
+            raise ValueError("linkedin_account_uuid required. Set LINKEDIN_ACCOUNT_UUID environment variable or pass linkedin_account_uuid parameter.")
+        
+        params = {'linkedinAccountUuid': self.linkedin_account_uuid}
+        response = self._make_request('GET', '/campaigns', params)
+        
+        # Extract campaigns from response
+        if isinstance(response, dict) and 'data' in response:
+            if isinstance(response['data'], dict) and 'data' in response['data']:
+                return response['data']['data']
+            elif isinstance(response['data'], list):
+                return response['data']
+        
+        return []
     
     def get_campaign(self, campaign_id: str) -> Dict[str, Any]:
         """Get campaign details.

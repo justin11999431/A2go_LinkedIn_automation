@@ -49,10 +49,26 @@ def enroll_leads_in_campaigns(settings: Settings, dry_run: bool = True) -> dict:
     try:
         # Initialize clients
         credentials = settings.get_google_credentials()
-        sheets_client = GoogleSheetsClient(credentials)
+        
+        # Try OAuth if service account not available
+        oauth_refresh_token = settings.get_oauth_refresh_token()
+        oauth_client_id = settings.get_oauth_client_id()
+        oauth_client_secret = settings.get_oauth_client_secret()
+        
+        if credentials:
+            sheets_client = GoogleSheetsClient(credentials_json=credentials)
+        elif oauth_refresh_token and oauth_client_id and oauth_client_secret:
+            sheets_client = GoogleSheetsClient(
+                oauth_refresh_token=oauth_refresh_token,
+                client_id=oauth_client_id,
+                client_secret=oauth_client_secret
+            )
+        else:
+            raise ValueError("No Google credentials available")
         
         api_key = settings.get_salesrobot_api_key()
-        salesrobot_client = SalesrobotClient(api_key)
+        linkedin_account_uuid = settings.get_linkedin_account_uuid()
+        salesrobot_client = SalesrobotClient(api_key, linkedin_account_uuid)
         
         workflow_sheet_id = settings.get_workflow_sheet_id()
         
@@ -79,7 +95,7 @@ def enroll_leads_in_campaigns(settings: Settings, dry_run: bool = True) -> dict:
         logger.info(f"Found {len(campaigns)} campaigns")
         
         # Create campaign ID map
-        campaign_map = {c['name']: c['id'] for c in campaigns}
+        campaign_map = {c['name']: c['uuid'] for c in campaigns}
         
         # Process leads
         enrolled_count = 0
@@ -115,9 +131,14 @@ def enroll_leads_in_campaigns(settings: Settings, dry_run: bool = True) -> dict:
                     continue
                 
                 # Get campaign
-                campaign_name = lead.get('Campaign')
+                campaign_name = lead.get('Campaign Name') or lead.get('Campaign')
                 if not campaign_name:
-                    logger.warning(f"Skipping lead {lead_id}: no campaign specified")
+                    # Use default campaign if none specified
+                    campaign_name = 'A2go | Forecasting'
+                    logger.debug(f"Using default campaign for lead {lead_id}: {campaign_name}")
+                
+                if campaign_name not in campaign_map:
+                    logger.warning(f"Skipping lead {lead_id}: campaign '{campaign_name}' not found")
                     skipped_count += 1
                     continue
                 

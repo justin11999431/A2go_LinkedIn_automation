@@ -48,14 +48,29 @@ def sync_leads(settings: Settings, dry_run: bool = True) -> dict:
     try:
         # Initialize clients
         credentials = settings.get_google_credentials()
-        sheets_client = GoogleSheetsClient(credentials)
+        
+        # Try OAuth if service account not available
+        oauth_refresh_token = settings.get_oauth_refresh_token()
+        oauth_client_id = settings.get_oauth_client_id()
+        oauth_client_secret = settings.get_oauth_client_secret()
+        
+        if credentials:
+            sheets_client = GoogleSheetsClient(credentials_json=credentials)
+        elif oauth_refresh_token and oauth_client_id and oauth_client_secret:
+            sheets_client = GoogleSheetsClient(
+                oauth_refresh_token=oauth_refresh_token,
+                client_id=oauth_client_id,
+                client_secret=oauth_client_secret
+            )
+        else:
+            raise ValueError("No Google credentials available")
         
         source_sheet_id = settings.get_source_sheet_id()
         workflow_sheet_id = settings.get_workflow_sheet_id()
         
         # Fetch leads from source sheet
         logger.info(f"Fetching leads from source sheet: {source_sheet_id}")
-        source_data = sheets_client.get_sheet_data(source_sheet_id, 'Sheet1!A1:Z1000')
+        source_data = sheets_client.get_sheet_data(source_sheet_id, 'A2go-Forecast-Intent-75!A1:Z1000')
         
         if not source_data:
             logger.warning("No data found in source sheet")
@@ -115,6 +130,7 @@ def sync_leads(settings: Settings, dry_run: bool = True) -> dict:
         
         # Sync leads to workflow sheet
         synced_count = 0
+        new_leads = []
         
         for lead in valid_leads:
             try:
@@ -145,15 +161,10 @@ def sync_leads(settings: Settings, dry_run: bool = True) -> dict:
                     
                     logger.debug(f"Updated lead: {lead_id}")
                 else:
-                    # Insert new lead
+                    # Collect new leads for batch append
                     new_row = WorkflowSheetWriter.lead_to_row(lead)
-                    
-                    if not dry_run:
-                        # Append row to sheet
-                        range_name = "Sheet1!A1"
-                        sheets_client.append_sheet_data(workflow_sheet_id, range_name, [new_row])
-                    
-                    logger.debug(f"Inserted lead: {lead_id}")
+                    new_leads.append(new_row)
+                    logger.debug(f"Collected new lead: {lead_id}")
                 
                 synced_count += 1
             except Exception as e:
@@ -161,6 +172,19 @@ def sync_leads(settings: Settings, dry_run: bool = True) -> dict:
                 results['errors'].append({
                     'lead_id': lead.get('lead_id', 'unknown'),
                     'error': str(e),
+                })
+        
+        # Batch append new leads
+        if new_leads and not dry_run:
+            try:
+                logger.info(f"Batch appending {len(new_leads)} new leads...")
+                range_name = "Sheet1!A1"
+                sheets_client.append_sheet_data(workflow_sheet_id, range_name, new_leads)
+                logger.info(f"Successfully appended {len(new_leads)} new leads")
+            except Exception as e:
+                logger.error(f"Error batch appending leads: {e}")
+                results['errors'].append({
+                    'error': f"Batch append failed: {str(e)}",
                 })
         
         results['synced_leads'] = synced_count

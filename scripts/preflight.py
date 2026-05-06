@@ -33,37 +33,54 @@ def check_google_credentials(settings: Settings) -> dict:
     """
     logger.info("Checking Google credentials...")
     
+    # Check for service account credentials
     credentials = settings.get_google_credentials()
     
-    if not credentials:
+    # Check for OAuth credentials
+    oauth_refresh_token = settings.get_oauth_refresh_token()
+    oauth_client_id = settings.get_oauth_client_id()
+    oauth_client_secret = settings.get_oauth_client_secret()
+    
+    # Determine which authentication method to use
+    if credentials:
+        # Service account authentication
+        try:
+            credentials_dict = json.loads(credentials)
+            required_fields = ['type', 'project_id', 'private_key_id', 'private_key', 'client_email']
+            
+            for field in required_fields:
+                if field not in credentials_dict:
+                    return {
+                        'status': 'FAIL',
+                        'message': f'Missing required field in credentials: {field}',
+                        'details': 'Ensure your service account JSON is complete'
+                    }
+            
+            return {
+                'status': 'PASS',
+                'message': 'Google service account credentials valid',
+                'details': f'Service account: {credentials_dict.get("client_email", "unknown")}'
+            }
+        except json.JSONDecodeError:
+            return {
+                'status': 'FAIL',
+                'message': 'Invalid JSON in credentials',
+                'details': 'Ensure GOOGLE_SERVICE_ACCOUNT_JSON is valid JSON'
+            }
+    
+    elif oauth_refresh_token and oauth_client_id and oauth_client_secret:
+        # OAuth 2.0 authentication
+        return {
+            'status': 'PASS',
+            'message': 'Google OAuth 2.0 credentials valid',
+            'details': f'Client ID: {oauth_client_id[:20]}...'
+        }
+    
+    else:
         return {
             'status': 'FAIL',
             'message': 'Google credentials not found',
-            'details': 'Set GOOGLE_SERVICE_ACCOUNT_JSON environment variable or configure in settings.json'
-        }
-    
-    try:
-        credentials_dict = json.loads(credentials)
-        required_fields = ['type', 'project_id', 'private_key_id', 'private_key', 'client_email']
-        
-        for field in required_fields:
-            if field not in credentials_dict:
-                return {
-                    'status': 'FAIL',
-                    'message': f'Missing required field in credentials: {field}',
-                    'details': 'Ensure your service account JSON is complete'
-                }
-        
-        return {
-            'status': 'PASS',
-            'message': 'Google credentials valid',
-            'details': f'Service account: {credentials_dict.get("client_email", "unknown")}'
-        }
-    except json.JSONDecodeError:
-        return {
-            'status': 'FAIL',
-            'message': 'Invalid JSON in credentials',
-            'details': 'Ensure GOOGLE_SERVICE_ACCOUNT_JSON is valid JSON'
+            'details': 'Set GOOGLE_SERVICE_ACCOUNT_JSON or OAuth credentials (OAUTH_REFRESH_TOKEN, OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET)'
         }
 
 
@@ -130,11 +147,31 @@ def check_google_sheets_access(settings: Settings) -> dict:
         }
     
     try:
+        # Try service account first
         credentials = settings.get_google_credentials()
-        client = GoogleSheetsClient(credentials)
+        
+        # Try OAuth if service account not available
+        oauth_refresh_token = settings.get_oauth_refresh_token()
+        oauth_client_id = settings.get_oauth_client_id()
+        oauth_client_secret = settings.get_oauth_client_secret()
+        
+        if credentials:
+            client = GoogleSheetsClient(credentials_json=credentials)
+        elif oauth_refresh_token and oauth_client_id and oauth_client_secret:
+            client = GoogleSheetsClient(
+                oauth_refresh_token=oauth_refresh_token,
+                client_id=oauth_client_id,
+                client_secret=oauth_client_secret
+            )
+        else:
+            return {
+                'status': 'FAIL',
+                'message': 'No Google credentials available',
+                'details': 'Set GOOGLE_SERVICE_ACCOUNT_JSON or OAuth credentials'
+            }
         
         # Test access to source sheet
-        source_data = client.get_sheet_data(source_sheet_id, 'Sheet1!A1:Z1')
+        source_data = client.get_sheet_data(source_sheet_id, 'A2go-Forecast-Intent-75!A1:Z1')
         
         # Test access to workflow sheet
         workflow_data = client.get_sheet_data(workflow_sheet_id, 'Sheet1!A1:Z1')
@@ -165,7 +202,16 @@ def check_salesrobot_api_access(settings: Settings) -> dict:
     
     try:
         api_key = settings.get_salesrobot_api_key()
-        client = SalesrobotClient(api_key)
+        linkedin_account_uuid = settings.get_linkedin_account_uuid()
+        
+        if not linkedin_account_uuid:
+            return {
+                'status': 'FAIL',
+                'message': 'LinkedIn account UUID not found',
+                'details': 'Set LINKEDIN_ACCOUNT_UUID environment variable or configure in settings.json'
+            }
+        
+        client = SalesrobotClient(api_key, linkedin_account_uuid)
         
         # Test API access by getting campaigns
         campaigns = client.get_campaigns()
@@ -278,7 +324,7 @@ def main():
     print("\n")
     
     for check in results['checks']:
-        status_symbol = "✓" if check['status'] == 'PASS' else "✗"
+        status_symbol = "[PASS]" if check['status'] == 'PASS' else "[FAIL]"
         print(f"{status_symbol} {check['check']}: {check['message']}")
         if check['status'] == 'FAIL':
             print(f"  Details: {check['details']}")
