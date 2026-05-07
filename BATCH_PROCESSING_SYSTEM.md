@@ -17,10 +17,18 @@ This system automates LinkedIn outreach in batches, processing up to 20 new lead
 - **Bridge Message**: 15-21 days after connection acceptance
 - **Final Message**: 25-35 days after connection acceptance
 
-### 3. Batch Processing
+### 3. Human-in-Loop Response Detection
+- **Automatic response detection**: Checks for prospect responses
+- **Immediate stop**: Stops all automation for leads with responses
+- **Persistent stop**: Automation does not resume for stopped leads
+- **Response window**: Checks for responses within last 7 days
+- **Status tracking**: Updates workflow sheet with stop reason
+
+### 4. Batch Processing
 - **New connections**: Up to 20 per day (adjusted for follow-ups)
 - **Follow-up messages**: Sent based on timing, not batch size
 - **No disruption**: Previous leads' messaging sequences are preserved
+- **Response-aware**: Skips leads where automation is stopped
 
 ## How It Works
 
@@ -158,9 +166,14 @@ All settings are in `settings.json`:
 The workflow sheet tracks:
 - **Lead ID**: Unique identifier
 - **LinkedIn Profile URL**: LinkedIn profile
-- **Connection Status**: Current status
+- **Connection Status**: Current status (Sent, Accepted, Connected)
 - **Connection Accepted Date**: When connection was accepted
 - **Last Action Date**: Timestamp of last action
+- **Reply Status**: Response status from prospect
+- **Reply Text**: Response text from prospect
+- **Last Human Update**: When prospect last responded
+- **Automation Stopped**: Whether automation is stopped (Yes/No)
+- **Stop Reason**: Reason for stopping automation
 - **Follow-up Messages**: 4 messages per lead
 - **Message Sent Dates**: When each message was sent
 
@@ -185,6 +198,55 @@ The workflow sheet tracks:
 - **Purpose**: Respectful close, leave door open
 - **Content**: Low-pressure, no guilt
 - **Signature**: Patrick Romeri signature included
+
+## Human-in-Loop Response Detection
+
+### How It Works
+The system automatically detects when a prospect responds to any message and immediately stops all automation for that lead.
+
+### Detection Criteria
+- **Response window**: Checks for responses within last 7 days
+- **Response types**: Replied, Responded, Answered
+- **Detection method**: Checks Reply Status and Last Human Update columns
+
+### Stop Behavior
+- **Immediate stop**: All automation stops for that lead
+- **Persistent stop**: Automation does not resume for stopped leads
+- **Status update**: Workflow sheet marked with "Automation Stopped: Yes"
+- **Reason tracking**: Stop reason recorded in workflow sheet
+
+### Example Scenarios
+
+#### Scenario 1: Prospect responds to connection request
+- **Detection**: Response detected in workflow sheet
+- **Action**: Automation stops immediately
+- **Result**: No follow-up messages sent
+- **Status**: "Automation Stopped: Yes - Response detected: Replied"
+
+#### Scenario 2: Prospect responds to follow-up message
+- **Detection**: Response detected in workflow sheet
+- **Action**: Automation stops immediately
+- **Result**: No further messages sent
+- **Status**: "Automation Stopped: Yes - Response detected: Responded"
+
+#### Scenario 3: No response
+- **Detection**: No response in workflow sheet
+- **Action**: Automation continues normally
+- **Result**: Follow-up messages sent on schedule
+- **Status**: "Automation Stopped: No"
+
+### Benefits
+- **Respectful**: Stops when prospect engages
+- **Professional**: Doesn't overwhelm prospects
+- **Compliant**: Follows LinkedIn best practices
+- **Trackable**: All stops are logged
+
+### Implementation
+The human-in-loop check runs daily at 9:00 AM as part of the batch processing:
+1. Checks for new responses
+2. Stops automation for leads with responses
+3. Updates workflow sheet with stop status
+4. Skips stopped leads in all future processing
 
 ## Troubleshooting
 
@@ -230,12 +292,20 @@ Check how many leads need copy:
 python scripts\check_remaining_leads.py
 ```
 
+### Check Human Responses
+Check for new human responses:
+```bash
+python scripts\check_human_responses.py
+```
+
 ### Check Workflow Sheet
 Review the workflow sheet to see:
 - Connection status
 - Message sent dates
 - Last action dates
 - Remaining leads
+- Automation stopped status
+- Stop reasons
 
 ## Next Steps
 
@@ -247,8 +317,9 @@ Review the workflow sheet to see:
 
 ## Files
 
-- `scripts/batch_processing.py` - Main batch processing system
+- `scripts/batch_processing.py` - Main batch processing system with human-in-loop
 - `scripts/check_remaining_leads.py` - Check remaining leads
+- `scripts/check_human_responses.py` - Check for human responses
 - `scripts/generate_copy.py` - Generate copy for leads
 - `scripts/schedule_batch_processing.bat` - Schedule daily 9:00 AM
 - `settings.json` - Configuration file
@@ -261,9 +332,13 @@ Review the workflow sheet to see:
 - Quota adjusted based on follow-up messages needed
 - All messages include Patrick Romeri signature
 - Workflow sheet updated with all actions
-- Rate limits respected
-- 2-second delay between messages
+- Rate limits respected (2-second delay between messages)
 - Previous leads' messaging sequences preserved
+- **Human-in-loop response detection enabled**
+- **Automation stops immediately when prospect responds**
+- **Stopped leads are skipped in all future processing**
+- **Response window: 7 days**
+- **Stop status is persistent**
 
 ## Support
 

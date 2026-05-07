@@ -23,11 +23,13 @@ if %errorlevel% equ 0 (
     echo.
     echo The batch processing will now run automatically every day at 9:00 AM.
     echo.
-    echo Features:
-    echo - Processes up to 20 new leads per day
-    - Adjusts quota based on follow-up messages needed
-    - Sends follow-up messages based on timing
-    - Updates workflow sheet with all actions
+echo Features:
+echo - Processes up to 20 new leads per day
+echo - Adjusts quota based on follow-up messages needed
+echo - Sends follow-up messages based on timing
+- Checks for human responses and stops automation
+- Updates workflow sheet with all actions
+echo - Preserves messaging sequences for all leads
     echo.
     echo To run the batch processing manually, run: batch_processing.py
     echo.
