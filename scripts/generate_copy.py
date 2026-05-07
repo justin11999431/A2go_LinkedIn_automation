@@ -361,6 +361,18 @@ If the A2go white paper or positioning material is missing:
 Before returning any output, scan it once for the em-dash character (—). If any are found, replace them with a comma, period, colon, semicolon, parentheses, or "to," whichever is grammatically correct, then return the cleaned version. This check is mandatory.
 </final_self_check>
 
+<sender_signature>
+All messages must include the following signature at the end:
+
+Patrick Romeri
+Director of Marketing
+Analytics2Go, Inc.
+M +1 508-808-4820
+W www.a2go.ai
+
+Add this signature to the end of every message in the DM sequence (Colleague, Customer, Bridge, Final). Do not add it to connection requests or warm-up comments.
+</sender_signature>
+
 IMPORTANT: You must respond with valid JSON only. No markdown, no code blocks, no explanations. Just the JSON object with the following structure:
 {
   "research_summary": {
