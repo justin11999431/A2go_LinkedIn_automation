@@ -638,113 +638,178 @@ A2go_LinkedIn_automation/
 - **Documentation Files**: 5
 - **GitHub Actions Workflows**: 3
 
-## LinkedIn Copy Generation Prompt Update (May 6, 2026)
+## LinkedIn Copy Generation Prompt Update v2 (May 6, 2026)
 
 ### Overview
-Updated the LinkedIn copy generation prompt with comprehensive messaging rules to improve outreach quality and avoid spam signals.
+Updated the LinkedIn copy generation prompt with comprehensive messaging rules v2 to eliminate AI text signals and improve outreach quality.
 
 ### Key Improvements
 
-#### 1. Honest Cold Connection Request Approach
-- Implemented Josh Braun-style disarm technique
-- Connection requests now explicitly state "cold connect, no pitch"
-- Frames sender as peer building deliberate network, not vendor working a list
-- Example: "Walt Walker - cold connect, no pitch. Building out my network of logistics operators deliberately and you came up. No agenda."
+#### 1. Hard Output Rules (Absolute)
+- NEVER use em-dash character (—, U+2014) anywhere in any output - immediate signal of AI-generated text
+- Use grammatically appropriate substitutes: comma, period, colon, semicolon, parentheses, or regular hyphen
+- Do not substitute with en-dash (–, U+2013) either - also a typographic tell
+- Number ranges use regular hyphen ("1-2 sentences") or word "to" ("1 to 2 sentences")
+- Applies to every output: connection requests, comments, DMs, research summaries, headers, example copy
 
-#### 2. Forbidden Phrases List
-Added comprehensive list of phrases to avoid in connection requests and first-touch DMs:
+#### 2. Sequence Philosophy
+- Connection, Colleague, Customer arc - each stage escalates trust, not pressure
+- Connection: earn right to be in feed without being filtered as spam. Audition, not pitch.
+- Colleague: become contact who sends value, not asks for time. Pure give. No ask.
+- Customer: invert dynamic. Become learner asking prospect for expert read. Ask for help, not meeting.
+- Product reveal earned by their interest, never pushed by calendar
+
+#### 3. Psychological Levers
+Active levers in sequence:
+- Reciprocity: value given before any value asked
+- Authority: demonstrated through specificity and operational depth, never claimed
+- Liking: peer-to-peer voice, status equality, no flattery
+- Ben Franklin effect: asking for small intellectual favor makes prospect more invested
+- Commitment / consistency: small reply on M2 makes fuller engagement on M3 dramatically more likely
+- Identification: "this person understands my world" beats "this person has impressive credentials"
+
+Levers that must NOT be used:
+- Scarcity / false urgency
+- Guilt ("just bumping this in case it got buried")
+- Manufactured FOMO
+- Inflated stats or invented case studies
+
+#### 4. Enhanced Messaging Rules
+
+**Colleague-message mindset:**
+- Frame as observation, not capability. Use "I've been watching a few [type of company] hit the same wall"
+- Reference type of company without naming names. Specificity in operational mechanic, not logo
+- Insight must pass screenshot test: would real peer save and forward to team?
+- End with no CTA. Optional close: "thought you might find it useful" or "no reply needed."
+
+**Customer-message mindset:**
+- Position prospect as expert, sender as learner
+- Frame ask as calibration, sanity-check, triangulation, or "help me understand"
+- One question per message, asked well. Not a survey
+- Question should be answerable in 1 to 2 sentences if brief, longer if deeper
+- Still no A2go mention, still no meeting ask
+
+**Forbidden phrases (expanded):**
 - "I came across your profile" / "I noticed your profile" / "Your profile caught my eye"
-- "I was impressed by…" / "Impressed with your experience" / "Your background is impressive"
+- "I was impressed by..." / "Impressed with your experience" / "Your background is impressive"
 - "I'd love to connect" / "I'd love to discuss" / "I'd love to chat" / "I'd love to explore"
+- "I thought of you when..." / "This made me think of you"
 - "Quick question" / "Picking your brain" / "Pick your brain"
 - "Hope this finds you well" / "Hope you're having a great week"
+- "Are you struggling with..." / "Is X a pain point for you" / "How are you handling X"
+- "We've helped companies like yours..." / "Our customers see..." / "Companies like yours often..."
+- "Just checking in" / "Just bumping this" / "Did you see my last message"
+- "Would you have 15 minutes..." (anywhere before Message 3)
 - Any first-message mention of A2go, the platform, AI agents, decision intelligence
 - Any opening sentence that begins with "I"
-- Any compliment about the prospect's "experience," "career," "track record," or "leadership"
+- Any compliment about prospect's "experience," "career," "track record," or "leadership"
 
-#### 3. Connection Request Mindset
-- Connection request is an audition for feed access, not a sales message
-- Drop the "I" opening - open with them, their world, or an observation
-- Skip fake compliments entirely
-- Specificity beats flattery - signal "I understand your world," not "I admire you"
-- With only name, title, and industry, speak to the role and industry, not the person
+#### 5. Enhanced Post-Acceptance Sequence
 
-#### 4. Enhanced Post-Acceptance DM Sequence
-Improved 4-message sequence with better timing and structure:
+**Message 1: COLLEAGUE (Insight share)**
+- Timing: 1 to 3 days after acceptance
+- Goal: Demonstrate real understanding. Give without asking. Make them save message.
+- Length: 80 to 120 words
+- Structure: Optional one-line acknowledgment, pivot to specific operational pattern, share actual insight (tactical, useable mechanic), reference type of company without names, close with NO CTA
+- Insight must be something real operator would screenshot, show don't tell expertise, leave small open loop
+- Forbidden: "We helped [type of customer]...", any A2go mention, any meeting ask, "I thought of you when...", em-dashes
 
-**Message 1: Rapport/value message**
-- Sent after acceptance
-- No pitch, no mention of A2go
-- Open with prospect's world, not sender's
-- Optional single line acknowledging connect, then move to value
-- Disarm tone carries forward
+**Message 2: CUSTOMER (Bellwether question)**
+- Timing: 5 to 9 days after Message 1, regardless of reply
+- Goal: Apply consistent expertise demonstration, invert dynamic by asking for THEIR perspective
+- Length: 80 to 120 words
+- Structure: Open with short specific operational observation, pivot to low-effort ego-flattering question, frame ask as calibration/sanity-check/triangulation, one question asked well
+- Question structures: "I'm trying to figure out if [observation] is universal or specific to [type X]. Your read would help me calibrate."
+- Question must be specific to role not company, position them as expert, be answerable without revealing sensitive info, surface problem A2go solves without naming in vendor language, pass "would curious peer ask this at conference dinner?" test
+- Forbidden: Any A2go mention, any meeting ask, "Are you struggling with..." / "Is X a pain point" / "How are you handling X", multiple questions, em-dashes
 
-**Message 2: Insight message**
-- Share useful OTIF, planning, inventory, or fulfillment insight
-- No hard pitch
-- Make prospect feel understood
-- Speak in operator language, specifics over abstractions
-- Insight should be genuinely useful even if they never reply
+**Message 3: BRIDGE (branches on engagement)**
+- Timing: 4 to 7 days after Message 2
+- Goal: If engaged, name A2go gently and offer value-based next step. If silent, deliver more value and leave door open.
+- Length: 80 to 120 words for either variant
 
-**Message 3: Soft problem hypothesis**
-- Introduce likely business issue
-- Lightly connect issue to A2go's perspective (first message where A2go can be named)
-- Use permission-based CTA ("worth a 15-min compare-notes?" / "want me to send the one-pager?")
+**Variant A: ENGAGED (they replied to M1 or M2)**
+- Acknowledge what they shared, build on it
+- First place A2go can be named. Keep it light: "this connects to something I'm seeing on the A2go side"
+- Offer value-based next step: specific resource, sample analysis, or permission-based "want me to send..." NOT calendar link
+- Permission-based CTA: "want me to send the breakdown?" / "worth a 15-min compare-notes if you're curious?" / "happy to share what we're seeing, want it?"
 
-**Message 4: Low-pressure final note**
-- Brief and respectful
-- Offer useful reason to continue conversation
-- No guilt, hype, or false urgency
-- Leave door open without rattling it
+**Variant B: SILENT (no reply to M1 or M2)**
+- Don't acknowledge silence. No "just checking in," no guilt
+- Deliver one more useful piece of intel, kept short
+- Mention A2go briefly and matter-of-factly, attached to operational theme, not as pitch
+- Soft door-open: "Around if any of this lines up with your world, no pressure either way."
 
-#### 5. Persona Adjustment
-Added persona-specific angle adjustments for different executive roles:
-- **COO / President / GM**: business performance, customer commitments, operating rhythm, margin leakage
-- **VP Supply Chain**: OTIF, inventory, planning, supplier reliability, exception management
-- **VP Operations**: throughput, fulfillment, expediting, plant/DC coordination, process reliability
-- **CFO**: premium freight, working capital, margin leakage, cash conversion, customer penalties
+**Message 4: FINAL TOUCH (respectful close)**
+- Timing: 10 to 14 days after Message 3 if no engagement
+- Goal: Plant seed for future. No guilt, no urgency, no "last attempt" theatrics
+- Length: 40 to 80 words
+- Structure: One short line acknowledging moment (not silence), one short line of perspective worth holding onto, door open for whenever timing is right
+- Forbidden: "Just one last try..." / "Closing the loop..." / "Bumping this one more time...", any guilt framing, any urgency invented for moment, em-dashes
 
-#### 6. Improved Style Constraints
-- Keep DMs under 120 words
+#### 6. Enhanced Style Constraints
+- ABSOLUTE: No em-dash character (—) anywhere in any output
+- ABSOLUTE: No en-dash character (–) in number ranges. Use regular hyphen or word "to"
+- Keep DMs under 120 words (Final Touch under 80)
 - Keep connection requests under 280 characters
 - Use plain English, avoid excessive buzzwords
 - Avoid emojis and over-personalization that feels fake
 - Make copy feel researched, relevant, and commercially mature
 - Use natural paragraphing, not one-line "bro-etry"
-- Voice in cold messages is peer-to-peer (operator-to-operator), not vendor-to-prospect
+- Voice across entire sequence is peer-to-peer (operator-to-operator), not vendor-to-prospect
 - Default to honesty about cold reach over manufactured warmth
+- Specificity beats flattery. Skip compliment if cannot be made specifically and verifiably true
 - If message could be sent by bot to 10,000 people with name/title swapped in, rewrite it
+- Colleague message must pass screenshot test
+- Customer message must pass conference-dinner test
 
 #### 7. Enhanced Failure Handling
 - If lead/account research is limited: say what's missing, label assumptions clearly, still produce usable copy based on best available hypothesis
 - Do not fabricate company events, prospect posts, metrics, or pain points
-- When research is thin, lean harder into Version A (honest cold) for connection request
-- If A2go white paper or positioning material is missing: use only provided context, avoid specific product claims or quantified results
+- When research is thin, lean harder into Version A (honest cold) for connection request, lean Colleague message toward role-and-industry intel rather than company-specific intel
+- If A2go white paper or positioning material is missing: use only provided context, avoid specific product claims or quantified results, Bridge message should reference A2go in observational language ("what we're seeing on the A2go side") rather than capability claims
+
+#### 8. Final Self-Check
+- Mandatory check for em-dash character (—) before returning any output
+- If any found, replace with comma, period, colon, semicolon, parentheses, or "to," whichever is grammatically correct
+- Return cleaned version
 
 ### Testing Results
-Successfully tested new prompt with first lead (Walt Walker):
+Successfully tested new prompt v2 with first lead (Walt Walker):
 
 **Connection Request:**
-"Walt Walker - cold connect, no pitch. Building out my network of logistics operators deliberately and you came up. No agenda."
+"Hi Walt, cold connect, won't pretend otherwise. Building out my network of transportation operators deliberately and you came up. No pitch."
 
-**Message 1:**
-"Hi Walt, thanks for connecting. I wanted to follow up on our connection and discuss some of the operational challenges you might be facing at Blackhawk Transport. What are some of the biggest pain points you're experiencing in your day-to-day operations?"
+**Message 1 (Colleague):**
+"Hi Walt, I've been watching a few mid-sized transportation companies hit the same wall when it comes to operational efficiency. They're struggling to balance timely delivery with cost control. Thought you might find it useful to know that's not unique to Blackhawk Transport."
 
-**Message 2:**
-"Walt, I wanted to share an insight on supply chain optimization. Implementing proactive planning and communication strategies can significantly reduce delays and costs. Have you explored any similar initiatives at Blackhawk Transport?"
+**Message 2 (Customer):**
+"Hi Walt, I'm trying to figure out if the trend of increasing transportation costs is universal or specific to certain regions. Your read would help me calibrate. Is this something you're seeing at Blackhawk Transport?"
 
-**Message 3:**
-"Walt, based on our conversation, I'm hypothesizing that Blackhawk Transport might be experiencing issues with late shipments and order promise failures. A2go's AI-powered decision intelligence platform has helped similar companies improve their OTIF rates and reduce costs. Worth a 15-min compare-notes?"
+**Message 3 (Bridge - Engaged):**
+"Hi Walt, thanks for sharing your thoughts on transportation costs. This connects to something I'm seeing on the A2go side, where companies are using AI-powered logistics platforms to improve operational efficiency. Want me to send the breakdown?"
 
-**Message 4:**
-"Hi Walt, just wanted to follow up on our conversation and see if you'd like to continue exploring ways to improve Blackhawk Transport's operational efficiency. No pressure, just a helpful resource if you need it."
+**Message 4 (Final):**
+"Hi Walt, no pressure either way, but if you're ever looking to explore ways to improve operational efficiency at Blackhawk Transport, the door's open. No follow-up coming after this."
+
+**Verification:**
+- No em-dashes in any output ✓
+- Connection request uses honest cold approach ✓
+- Colleague message provides value without asking ✓
+- Customer message asks for perspective (bellwether question) ✓
+- Bridge message mentions A2go lightly ✓
+- Final message is respectful and low-pressure ✓
+- All messages avoid forbidden phrases ✓
 
 ### Impact
+- Eliminated AI text signals (em-dashes, en-dashes)
 - Improved connection request quality with honest, peer-to-peer tone
 - Eliminated spam signals and fake personalization
 - Better alignment with modern LinkedIn outreach best practices
 - More respectful and professional approach to cold outreach
 - Higher likelihood of connection acceptance and engagement
+- Psychological levers properly applied throughout sequence
+- Screenshot test and conference-dinner test ensure quality
 
 ## Conclusion
 
