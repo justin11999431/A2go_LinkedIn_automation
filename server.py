@@ -60,6 +60,36 @@ scheduler.add_job(func=run_orchestration_cycle, trigger="interval", minutes=15)
 scheduler.start()
 
 
+# ─── Dashboard / Root ──────────────────────────────────────────────────────────
+@app.route("/", methods=["GET"])
+def index():
+    html = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>A2go Orchestration Engine</title>
+        <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+            .card { background-color: #1e293b; padding: 3rem; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.2); text-align: center; max-width: 500px; border: 1px solid #334155; }
+            h1 { color: #38bdf8; margin-top: 0; font-size: 1.8rem; }
+            .status { display: inline-block; background-color: #10b981; color: white; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.875rem; font-weight: bold; margin: 1rem 0; letter-spacing: 0.05em; }
+            p { color: #94a3b8; line-height: 1.6; }
+            .footer { margin-top: 2rem; font-size: 0.75rem; color: #475569; }
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <h1>A2go Marketing Orchestration</h1>
+            <div class="status">● SYSTEM ONLINE</div>
+            <p>The webhook server and background scheduler are actively running.</p>
+            <p>Waiting for GoHighLevel, Brevo, and MessageBird webhooks.</p>
+            <div class="footer">Version 1.0.0 &bull; Python Flask Engine</div>
+        </div>
+    </body>
+    </html>
+    """
+    return html, 200
+
 # ─── Health check ──────────────────────────────────────────────────────────────
 @app.route("/health", methods=["GET"])
 def health():
