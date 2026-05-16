@@ -24,6 +24,16 @@ def handle_ghl_webhook(payload: Dict[str, Any]) -> bool:
         return _handle_appointment_event(payload)
     elif event_type == "contact_tag_added":
         return _handle_tag_event(payload)
+    elif event_type == "stop_outreach":
+        # Direct command from the webhook URL query string
+        email = payload.get("email")
+        if email:
+            logger.info(f"Direct 'stop_outreach' webhook received for {email}")
+            db = StateDatabase()
+            state = db.get_state_by_email(email)
+            if state:
+                pauseContactAutomation(state.lead_id, "GHL Webhook: Manual Stop")
+                return True
     
     return False
 

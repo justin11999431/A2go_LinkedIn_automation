@@ -102,6 +102,12 @@ def ghl_webhook():
     if not _check_secret(request):
         return jsonify({"error": "Unauthorized"}), 401
     payload = request.get_json(silent=True) or {}
+    
+    # Allow passing type via query string (e.g. ?type=appointment)
+    event_type = request.args.get("type") or payload.get("type")
+    if event_type:
+        payload["type"] = event_type
+        
     logger.info(f"GHL webhook received: type={payload.get('type')}")
     try:
         handle_ghl_webhook(payload)
