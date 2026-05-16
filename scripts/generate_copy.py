@@ -22,10 +22,13 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Load settings
+settings = Settings()
+
 # NVIDIA API Configuration
-NVIDIA_API_KEY = os.getenv('NVIDIA_API_KEY')
-NVIDIA_BASE_URL = os.getenv('NVIDIA_BASE_URL', 'https://integrate.api.nvidia.com/v1')
-NVIDIA_MODEL = os.getenv('NVIDIA_MODEL', 'meta/llama-3.1-70b-instruct')
+NVIDIA_API_KEY = settings.get_nvidia_api_key()
+NVIDIA_BASE_URL = settings.get_nvidia_base_url()
+NVIDIA_MODEL = settings.get_nvidia_model()
 
 # System prompt for B2B LinkedIn Outbound Strategist
 SYSTEM_PROMPT = """You are a senior B2B LinkedIn outbound strategist and copywriter specializing in supply chain, industrial manufacturing, distribution, OTIF improvement, and AI-enabled operations.
@@ -477,12 +480,13 @@ def initialize_nvidia_client():
         return None
 
 
-def fetch_leads_needing_copy(sheets_client: GoogleSheetsClient, source_sheet_id: str) -> List[Dict[str, Any]]:
+def fetch_leads_needing_copy(sheets_client: GoogleSheetsClient, source_sheet_id: str, workflow_sheet_id: str) -> List[Dict[str, Any]]:
     """Fetch leads that need copy generation.
     
     Args:
         sheets_client: Google Sheets client
         source_sheet_id: Source sheet ID
+        workflow_sheet_id: Workflow sheet ID
         
     Returns:
         List of leads needing copy
@@ -490,22 +494,22 @@ def fetch_leads_needing_copy(sheets_client: GoogleSheetsClient, source_sheet_id:
     try:
         # Fetch all leads from source sheet
         logger.info(f"Fetching leads from source sheet: {source_sheet_id}")
-        data = sheets_client.get_sheet_data(source_sheet_id, 'A2go-Forecast-Intent-75!A1:Z1000')
+        source_data = sheets_client.get_sheet_data(source_sheet_id, 'A2go-Forecast-Intent-75!A1:Z1000')
         
-        if not data or len(data) < 2:
+        if not source_data or len(source_data) < 2:
             logger.warning("No data found in source sheet")
             return []
         
-        headers = data[0]
-        rows = data[1:]
+        source_headers = source_data[0]
+        source_rows = source_data[1:]
         
-        # Find column indices
+        # Find column indices in source sheet
         name_col = None
         title_col = None
         company_col = None
         linkedin_col = None
         
-        for i, header in enumerate(headers):
+        for i, header in enumerate(source_headers):
             header_lower = header.lower()
             if 'name' in header_lower and 'first' not in header_lower and 'last' not in header_lower:
                 name_col = i
@@ -520,17 +524,48 @@ def fetch_leads_needing_copy(sheets_client: GoogleSheetsClient, source_sheet_id:
             logger.error("Could not find Name column in source sheet")
             return []
         
-        # Parse leads
+        # Fetch existing leads from workflow sheet
+        logger.info(f"Fetching existing leads from workflow sheet: {workflow_sheet_id}")
+        workflow_data = sheets_client.get_sheet_data(workflow_sheet_id, 'Sheet1!A1:Z1000')
+        
+        existing_leads = set()
+        if workflow_data and len(workflow_data) > 1:
+            workflow_headers = workflow_data[0]
+            workflow_rows = workflow_data[1:]
+            
+            # Find LinkedIn URL column in workflow sheet
+            workflow_linkedin_col = None
+            for i, header in enumerate(workflow_headers):
+                if 'linkedin' in header.lower():
+                    workflow_linkedin_col = i
+                    break
+            
+            if workflow_linkedin_col is not None:
+                for row in workflow_rows:
+                    if row and len(row) > workflow_linkedin_col:
+                        linkedin_url = row[workflow_linkedin_col]
+                        if linkedin_url:
+                            existing_leads.add(linkedin_url)
+        
+        logger.info(f"Found {len(existing_leads)} leads with existing copy in workflow sheet")
+        
+        # Parse leads from source sheet, filtering out existing ones
         leads = []
-        for row in rows:
+        for row in source_rows:
             if not row or len(row) <= name_col:
+                continue
+            
+            linkedin_url = row[linkedin_col] if linkedin_col is not None and linkedin_col < len(row) else ''
+            
+            # Skip if lead already has copy in workflow sheet
+            if linkedin_url and linkedin_url in existing_leads:
                 continue
             
             lead = {
                 'name': row[name_col] if name_col < len(row) else '',
                 'title': row[title_col] if title_col is not None and title_col < len(row) else '',
                 'company': row[company_col] if company_col is not None and company_col < len(row) else '',
-                'linkedin_url': row[linkedin_col] if linkedin_col is not None and linkedin_col < len(row) else '',
+                'linkedin_url': linkedin_url,
             }
             
             # Only include leads with at least a name
@@ -739,7 +774,7 @@ def generate_copy_for_all_leads(settings: Settings, max_leads: Optional[int] = N
             return results
         
         # Fetch leads needing copy
-        leads = fetch_leads_needing_copy(sheets_client, source_sheet_id)
+        leads = fetch_leads_needing_copy(sheets_client, source_sheet_id, workflow_sheet_id)
         
         if not leads:
             logger.warning("No leads found needing copy generation")

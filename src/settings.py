@@ -5,8 +5,12 @@ import json
 import logging
 from typing import Dict, Any, Optional
 from pathlib import Path
+from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 class Settings:
@@ -26,6 +30,7 @@ class Settings:
         'automation': {
             'timezone': 'America/Los_Angeles',
             'dry_run': True,
+            'safety_mode': True,
             'batch_size': 50,
             'max_retries': 3,
             'retry_delay': 5,
@@ -340,3 +345,101 @@ class Settings:
             Limit value
         """
         return self.get(f'limits.{limit_name}', default)
+    
+    def get_nvidia_api_key(self) -> Optional[str]:
+        """Get NVIDIA API key.
+        
+        Returns:
+            NVIDIA API key or None
+        """
+        # Check environment variable first
+        env_key = os.getenv('NVIDIA_API_KEY')
+        if env_key:
+            return env_key
+        
+        # Check settings file
+        return self.get('nvidia.api_key')
+    
+    def get_nvidia_base_url(self) -> str:
+        """Get NVIDIA API base URL.
+        
+        Returns:
+            NVIDIA API base URL
+        """
+        # Check environment variable first
+        env_url = os.getenv('NVIDIA_BASE_URL')
+        if env_url:
+            return env_url
+        
+        # Check settings file
+        return self.get('nvidia.base_url', 'https://integrate.api.nvidia.com/v1')
+    
+    def get_nvidia_model(self) -> str:
+        """Get NVIDIA model name.
+        
+        Returns:
+            NVIDIA model name
+        """
+        # Check environment variable first
+        env_model = os.getenv('NVIDIA_MODEL')
+        if env_model:
+            return env_model
+        
+        # Check settings file
+        return self.get('nvidia.model', 'meta/llama-3.1-70b-instruct')
+
+    def is_safety_mode(self) -> bool:
+        """Check if running in safety mode.
+        
+        Returns:
+            True if safety mode
+        """
+        return self.get('automation.safety_mode', True)
+
+    def validate(self) -> Dict[str, Any]:
+        """Validate settings.
+        
+        Returns:
+            Validation results
+        """
+        results = {
+            'valid': True,
+            'errors': [],
+            'warnings': [],
+        }
+        
+        # Check required environment variables
+        required_vars = [
+            'GOOGLE_SERVICE_ACCOUNT_JSON',
+            'SALESROBOT_API_KEY',
+            'SOURCE_LEAD_SHEET_ID',
+            'WORKFLOW_SHEET_ID',
+            'GHL_LOCATION_ID',
+            'GHL_PRIVATE_INTEGRATION_TOKEN',
+            'BREVO_API_KEY',
+            'MESSAGEBIRD_ACCESS_KEY',
+        ]
+        
+        for var in required_vars:
+            if var == 'GOOGLE_SERVICE_ACCOUNT_JSON':
+                # Google can be authenticated via Service Account JSON OR OAuth Refresh Token
+                has_service_account = os.getenv('GOOGLE_SERVICE_ACCOUNT_JSON') or self.get('google.service_account_json')
+                has_oauth = (os.getenv('OAUTH_REFRESH_TOKEN') or self.get('google.oauth_refresh_token')) and \
+                            (os.getenv('OAUTH_CLIENT_ID') or self.get('google.oauth_client_id')) and \
+                            (os.getenv('OAUTH_CLIENT_SECRET') or self.get('google.oauth_client_secret'))
+                
+                if not has_service_account and not has_oauth:
+                    results['valid'] = False
+                    results['errors'].append("Missing Google authentication: Provide either GOOGLE_SERVICE_ACCOUNT_JSON or OAUTH_REFRESH_TOKEN/CLIENT_ID/CLIENT_SECRET")
+            elif not os.getenv(var) and not self.get(var.lower().replace('_', '.')):
+                results['valid'] = False
+                results['errors'].append(f"Missing required setting: {var}")
+        
+        # Check safety modes
+        if not self.is_dry_run():
+            results['warnings'].append("DRY_RUN is disabled. Automation will send live outreach.")
+            
+        if not self.is_safety_mode():
+            results['warnings'].append("SAFETY_MODE is disabled. Human-in-the-loop checks may be bypassed.")
+            
+        return results
