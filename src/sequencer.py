@@ -3,7 +3,7 @@
 import logging
 import os
 from datetime import datetime, timedelta
-from typing import List, Optional
+from typing import List, Optional, Dict
 from src.settings import Settings
 from src.database import StateDatabase
 from src.models import SequenceState
