@@ -36,27 +36,53 @@ def _check_secret(req) -> bool:
     return token == WEBHOOK_SECRET
 
 
+from zoneinfo import ZoneInfo
+
 # ─── Background Scheduler ──────────────────────────────────────────────────────
-def run_orchestration_cycle():
-    """Background job that syncs leads and runs the sequencer."""
+def scheduled_sync_leads():
+    """Background job to sync new leads from Sheets to GHL."""
     try:
-        logger.info("=== Starting background orchestration cycle ===")
-        # 1. Sync new leads from Sheets to GHL & DB
-        logger.info("Running sync_leads...")
+        logger.info("=== Starting scheduled lead sync (Mon 8:00 AM PST) ===")
         sync_sheets_to_ghl()
-        
-        # 2. Run the sequencer iteration
-        logger.info("Running sequencer...")
+        logger.info("=== Finished scheduled lead sync ===")
+    except Exception as e:
+        logger.error(f"Error in scheduled sync: {e}")
+
+def scheduled_sequencer():
+    """Background job to run the sequencer iteration."""
+    try:
+        logger.info("=== Starting scheduled sequencer iteration ===")
         seq = Sequencer()
         seq.run_iteration()
-        logger.info("=== Finished background orchestration cycle ===")
+        logger.info("=== Finished scheduled sequencer ===")
     except Exception as e:
-        logger.error(f"Error in background orchestration cycle: {e}")
+        logger.error(f"Error in scheduled sequencer: {e}")
 
 # Initialize and start the scheduler
 scheduler = BackgroundScheduler()
-# Run every 15 minutes
-scheduler.add_job(func=run_orchestration_cycle, trigger="interval", minutes=15)
+
+pst_tz = ZoneInfo("America/Los_Angeles")
+
+# Job 1: Sync Google Sheets on Monday at 8:00 am PST
+scheduler.add_job(
+    func=scheduled_sync_leads, 
+    trigger="cron", 
+    day_of_week="mon", 
+    hour=8, 
+    minute=0, 
+    timezone=pst_tz
+)
+
+# Job 2: Run sequencer every 15 minutes between 9:00 AM and 5:00 PM PST, Monday through Friday
+scheduler.add_job(
+    func=scheduled_sequencer, 
+    trigger="cron", 
+    day_of_week="mon-fri", 
+    hour="9-16", 
+    minute="*/15", 
+    timezone=pst_tz
+)
+
 scheduler.start()
 
 
